@@ -3,440 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Whipper System Clone</title>
+    <title>RPGハクスラ 完全版</title>
     <style>
-        :root {
-            --bg: #141414; --panel: #262626; --text: #e0e0e0; --sub: #8a8a8a;
-            --accent: #7a22ff; --border: #3a3a3a; --red: #ff4545;
-        }
-        body {
-            font-family: sans-serif; background: #000; color: var(--text);
-            margin: 0; display: flex; justify-content: center; user-select: none;
-        }
-        #app {
-            width: 100%; max-width: 450px; height: 100vh; background: var(--bg);
-            display: flex; flex-direction: column; border: 1px solid var(--border);
-            position: relative; overflow: hidden;
-        }
-        header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; }
-        .screen { display: none; }
-        .screen.active { display: block; }
-        
-        /* UI Elements */
-        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin-bottom: 15px; }
-        .btn { background: #444; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
-        .btn.primary { background: var(--accent); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        /* Progress */
-        .progress-bg { background: #333; height: 10px; border-radius: 5px; overflow: hidden; margin: 10px 0; }
-        .progress-bar { background: var(--accent); height: 100%; width: 0%; transition: width 1s linear; }
-        
-        /* Logs */
-        .log-item { background: var(--panel); padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; border-left: 3px solid #555; }
-        .log-item.battle { border-left-color: var(--red); }
-        .log-item.loot { border-left-color: #00ff66; }
-        
-        /* Items & Status */
-        .list-item { background: var(--panel); border: 1px solid var(--border); padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .equip-btn { background: var(--accent); border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-        .stat-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.9rem; border-bottom: 1px solid #333; }
-        
-        /* Footer Tabs */
-        footer {
-            position: absolute; bottom: 0; width: 100%; height: 60px; background: var(--bg);
-            border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(4, 1fr);
-        }
-        .tab { background: none; border: none; color: var(--sub); cursor: pointer; font-size: 0.75rem; font-weight: bold; }
-        .tab.active { color: white; border-top: 2px solid var(--accent); }
+        :root { --bg: #121212; --card: #1e1e1e; --accent: #bb86fc; --text: #eee; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; }
+        .tab-content { display: none; padding: 15px; padding-bottom: 70px; }
+        .tab-content.active { display: block; }
+        .card { background: var(--card); border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+        .btn { background: #333; color: white; border: none; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; }
+        .btn-main { background: var(--accent); color: #000; font-weight: bold; }
+        #nav { position: fixed; bottom: 0; width: 100%; display: flex; background: #000; border-top: 1px solid #444; }
+        #nav button { flex: 1; padding: 15px; background: none; border: none; color: #888; }
+        #nav button.active { color: var(--accent); }
+        .log-item { border-bottom: 1px solid #333; padding: 8px 0; font-size: 0.85rem; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #444; margin-bottom: 5px; cursor: pointer; }
+        .highlight { border-color: var(--accent); background: #2a2a2a; }
+        #overlay { position: fixed; top:0; left:0; width:100%; background: rgba(0,0,0,0.9); padding: 20px; box-sizing: border-box; display: none; }
     </style>
 </head>
 <body>
 
-<div id="app">
-    <header>
-        <div>Whipper System</div>
-        <div id="ui-time">--:--</div>
-        <div class="btn" style="width:auto; padding:4px 8px; font-size:0.8rem; background:#666;" onclick="resetData()">データ初期化</div>
-    </header>
+<main>
+    <section id="tab-dungeon" class="tab-content active">
+        <h3>DUNGEON (瘴気度: <span id="miasma-lvl">0</span>)</h3>
+        <div id="dungeon-list"></div>
+    </section>
 
-    <main>
-        <section id="view-dungeon" class="screen active">
-            <div id="ui-idle-state">
-                <h3>ダンジョン選択</h3>
-                <div id="dungeon-list"></div>
-            </div>
-            
-            <div id="ui-explore-state" style="display:none;">
-                <h3 id="ui-current-dungeon-name">探索中...</h3>
-                <div class="card">
-                    <div style="text-align: center; font-size: 0.8rem; color: var(--sub);">帰還まで</div>
-                    <div id="ui-time-remain" style="text-align: center; font-size: 2rem; font-family: monospace;">00:00</div>
-                    <div class="progress-bg"><div class="progress-bar" id="ui-progress"></div></div>
-                    <button class="btn" onclick="abortExploration()">探索を中断する</button>
-                </div>
-                <div id="ui-explore-logs"></div>
-            </div>
-        </section>
+    <section id="tab-log" class="tab-content">
+        <h3>探索履歴 (直近10件)</h3>
+        <div id="log-list"></div>
+    </section>
 
-        <section id="view-log" class="screen">
-            <h3>探索の記録</h3>
-            <div id="ui-full-logs"></div>
-        </section>
+    <section id="tab-item" class="tab-content">
+        <h3>ITEM (解析・装備)</h3>
+        <div id="analysis-guide" style="display:none; color:var(--accent);"></div>
+        <div id="inventory-list"></div>
+    </section>
 
-        <section id="view-item" class="screen">
-            <h3>所持品</h3>
-            <div id="ui-inventory"></div>
-        </section>
+    <section id="tab-status" class="tab-content">
+        <h3>STATUS</h3>
+        <div class="card" id="status-display"></div>
+        <h4>永続ブースト (BP: <span id="bp-val">0</span>)</h4>
+        <div id="bp-upgrades"></div>
+    </section>
+</main>
 
-        <section id="view-status" class="screen">
-            <h3>ステータス</h3>
-            <div class="card">
-                <div class="stat-row"><span>名前</span><span id="st-name">たま</span></div>
-                <div class="stat-row"><span>レベル</span><span id="st-lv">1</span></div>
-                <div class="stat-row"><span>EXP</span><span id="st-exp">0 / 10</span></div>
-            </div>
-            <div class="card">
-                <div class="stat-row"><span>HP</span><span id="st-hp">20 / 20</span></div>
-                <div class="stat-row"><span>ATK (攻撃力)</span><span id="st-atk" style="color:var(--red);">5</span></div>
-                <div class="stat-row"><span>DEF (防御力)</span><span id="st-def">1</span></div>
-                <div class="stat-row"><span>STR (腕力)</span><span id="st-str">5</span></div>
-                <div class="stat-row"><span>VIT (体力)</span><span id="st-vit">5</span></div>
-                <div class="stat-row"><span>SPD (敏捷)</span><span id="st-spd">5</span></div>
-            </div>
-            <h3>装備</h3>
-            <div class="card">
-                <div class="stat-row"><span>武器</span><span id="eq-weapon">なし</span></div>
-                <div class="stat-row"><span>防具</span><span id="eq-armor">なし</span></div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <button class="tab active" onclick="switchTab('dungeon')">DUNGEON</button>
-        <button class="tab" onclick="switchTab('log')">LOG</button>
-        <button class="tab" onclick="switchTab('item')">ITEM</button>
-        <button class="tab" onclick="switchTab('status')">STATUS</button>
-    </footer>
-</div>
+<nav id="nav">
+    <button onclick="showTab('tab-dungeon')" class="active">DUNGEON</button>
+    <button onclick="showTab('tab-log')">LOG</button>
+    <button onclick="showTab('tab-item')">ITEM</button>
+    <button onclick="showTab('tab-status')">STATUS</button>
+</nav>
 
 <script>
-    /* ================= マスタデータ ================= */
-    const DUNGEONS = [
-        { id: "d1", name: "はじめの草むら", timeSec: 60, reqLv: 1, enemies: ["スライム", "コウモリ"], dropTypes: ["weapon", "armor"], dropRate: 0.5 },
-        { id: "d2", name: "迷いの森", timeSec: 180, reqLv: 3, enemies: ["ゴブリン", "フェアリー"], dropTypes: ["weapon", "armor"], dropRate: 0.7 },
-        { id: "d3", name: "深い洞窟", timeSec: 300, reqLv: 5, enemies: ["オーク", "ゴーレム"], dropTypes: ["weapon", "armor"], dropRate: 0.8 }
+    let state = {
+        miasma: 0,
+        bp: 0,
+        inventory: [],
+        logs: [],
+        dungeonClears: { "草むら": 0, "峡谷": 0, "魔王城": 0 },
+        analysisData: {}, // { name: { lv: 1, exp: 0 } }
+        stats: { str: 10, vit: 10, hp: 60 },
+        analysisState: null // { stage: 'selectTarget', targetId: null }
+    };
+
+    const BASE_ITEMS = [
+        { name: "木の棒", type: "weapon", baseAtk: 5, rarity: 1 },
+        { name: "なべのふた", type: "armor", baseDef: 5, rarity: 1 },
+        { name: "銅の指輪", type: "accessory", baseStats: 1, rarity: 1 }
     ];
 
-    const ENEMIES = {
-        "スライム": { hp: 15, atk: 3, def: 1, exp: 2 },
-        "コウモリ": { hp: 10, atk: 5, def: 0, exp: 3 },
-        "ゴブリン": { hp: 35, atk: 12, def: 5, exp: 8 },
-        "フェアリー": { hp: 20, atk: 18, def: 2, exp: 12 },
-        "オーク":   { hp: 80, atk: 25, def: 15, exp: 25 },
-        "ゴーレム": { hp: 150, atk: 20, def: 30, exp: 35 }
-    };
-
-    const ITEMS = {
-        weapon: [
-            { name: "木の棒", atk: 3, def: 0 },
-            { name: "こん棒", atk: 8, def: 0 },
-            { name: "ショートソード", atk: 15, def: 0 }
-        ],
-        armor: [
-            { name: "布の服", atk: 0, def: 2 },
-            { name: "革の鎧", atk: 0, def: 7 },
-            { name: "木の盾", atk: 0, def: 12 }
-        ]
-    };
-
-    /* ================= プレイヤーデータ ================= */
-    let player = {
-        name: "たま",
-        level: 1,
-        exp: 0,
-        baseHp: 20,
-        str: 5,
-        vit: 5,
-        spd: 5,
-        equipment: { weapon: null, armor: null },
-        inventory: []
-    };
-
-    let state = {
-        isExploring: false,
-        dungeonId: null,
-        startTime: 0,
-        endTime: 0,
-        logs: []
-    };
-
-    /* ================= システム処理 ================= */
-    function init() {
-        loadData();
-        renderDungeonList();
-        setInterval(gameLoop, 1000);
-        updateUI();
+    function showTab(id) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('#nav button').forEach(el => el.classList.remove('active'));
+        event.target.classList.add('active');
     }
 
-    // ステータス計算
-    function getMaxHp() { return player.baseHp + (player.vit * 2); }
-    function getAtk() { 
-        let eqAtk = player.equipment.weapon ? player.equipment.weapon.atk : 0;
-        return player.str + eqAtk; 
+    function runDungeon(name) {
+        const item = {
+            id: Date.now() + Math.random(),
+            ...BASE_ITEMS[Math.floor(Math.random()*BASE_ITEMS.length)],
+            erosion: state.miasma > 0 ? Math.floor(Math.random() * 50) : 0,
+            equipped: false
+        };
+        state.inventory.push(item);
+        state.dungeonClears[name] = 1; // 簡易的なクリア管理
+        
+        state.logs.unshift(`${name}帰還: ${item.name}を入手`);
+        if(state.logs.length > 10) state.logs.pop();
+
+        // 全クリア判定で瘴気度UP
+        if(Object.values(state.dungeonClears).every(c => c > 0)) {
+            state.miasma++;
+            state.dungeonClears = { "草むら": 0, "峡谷": 0, "魔王城": 0 };
+        }
+        render();
     }
-    function getDef() { 
-        let eqDef = player.equipment.armor ? player.equipment.armor.def : 0;
-        return Math.floor(player.vit / 2) + eqDef; 
-    }
-    function getExpNext() { return player.level * 10 + Math.floor(Math.pow(player.level, 1.5) * 5); }
 
-    // ゲームループ（1秒ごとの処理）
-    function gameLoop() {
-        const now = Date.now();
-        document.getElementById('ui-time').innerText = new Date().toTimeString().slice(0,5);
-
-        if (state.isExploring) {
-            const dungeon = DUNGEONS.find(d => d.id === state.dungeonId);
-            const totalMs = dungeon.timeSec * 1000;
-            const elapsed = now - state.startTime;
-            const remain = Math.max(0, state.endTime - now);
-
-            // UI更新
-            const p = Math.min(100, (elapsed / totalMs) * 100);
-            document.getElementById('ui-progress').style.width = p + '%';
-            
-            const rSec = Math.floor(remain / 1000);
-            const m = String(Math.floor(rSec / 60)).padStart(2, '0');
-            const s = String(rSec % 60).padStart(2, '0');
-            document.getElementById('ui-time-remain').innerText = `${m}:${s}`;
-
-            // ランダムエンカウント (5秒に1回程度の確率)
-            if (remain > 2000 && Math.random() < 0.2) {
-                processEncounter(dungeon);
-            }
-
-            // 探索完了
-            if (now >= state.endTime) {
-                finishExploration(dungeon);
+    function selectItem(id) {
+        if (!state.analysisState) {
+            // 通常タップ: 詳細表示や装備切り替え
+            const item = state.inventory.find(i => i.id === id);
+            if (item) item.equipped = !item.equipped;
+        } else {
+            // 解析操作
+            if (state.analysisState.stage === 'selectTarget') {
+                const item = state.inventory.find(i => i.id === id);
+                if (item.equipped) return alert("装備中は不可");
+                state.analysisState = { stage: 'selectMaterial', targetId: id };
+            } else {
+                // 素材選択
+                if (state.analysisState.targetId === id) return alert("自分自身は不可");
+                executeAnalysis(state.analysisState.targetId, id);
+                state.analysisState = null;
             }
         }
+        render();
     }
 
-    // 戦闘処理
-    function processEncounter(dungeon) {
-        const enemyName = dungeon.enemies[Math.floor(Math.random() * dungeon.enemies.length)];
-        const enemy = ENEMIES[enemyName];
+    function executeAnalysis(tId, mId) {
+        const target = state.inventory.find(i => i.id === tId);
+        const mat = state.inventory.find(i => i.id === mId);
+        if (target.name !== mat.name) return alert("同じ装備のみ合成可能");
         
-        // 簡易戦闘計算
-        const pAtk = getAtk();
-        const pDef = getDef();
+        // EXP加算
+        if(!state.analysisData[target.name]) state.analysisData[target.name] = { lv: 1, exp: 0 };
+        const data = state.analysisData[target.name];
+        data.exp += (mat.rarity * 1); // 簡易レアリティ補正
         
-        let dmgToEnemy = Math.max(1, pAtk - enemy.def);
-        let dmgToPlayer = Math.max(0, enemy.atk - pDef); // 現状HP減る概念はスキップ（放置優先のため）
-
-        // 倒すまでのターン数を概算して勝敗決定
-        let turns = Math.ceil(enemy.hp / dmgToEnemy);
-        
-        addLog(`⚔️ ${enemyName}と遭遇！ ${dmgToEnemy * turns}のダメージを与えて撃破した！`, 'battle');
-        gainExp(enemy.exp);
-    }
-
-    // 経験値とレベルアップ
-    function gainExp(amount) {
-        player.exp += amount;
-        addLog(`✨ ${amount} の経験値を獲得。`, 'system');
-        
-        while (player.exp >= getExpNext()) {
-            player.exp -= getExpNext();
-            player.level++;
-            player.baseHp += 5;
-            player.str += Math.floor(Math.random() * 3) + 1;
-            player.vit += Math.floor(Math.random() * 2) + 1;
-            player.spd += Math.floor(Math.random() * 2) + 1;
-            addLog(`🆙 レベルが ${player.level} に上がった！ステータスが上昇！`, 'loot');
-        }
-        saveData();
-    }
-
-    // アイテムドロップ
-    function rollLoot(dungeon) {
-        if (Math.random() < dungeon.dropRate) {
-            const type = dungeon.dropTypes[Math.floor(Math.random() * dungeon.dropTypes.length)];
-            const pool = ITEMS[type];
-            // ダンジョン難易度に応じて良いアイテムが出やすくする等の拡張が可能
-            const itemBase = pool[Math.floor(Math.random() * Math.min(pool.length, dungeon.reqLv))];
-            
-            // 固有のアイテムデータを生成（将来的には＋値などもここで付与）
-            const dropItem = {
-                id: Date.now() + Math.floor(Math.random()*1000),
-                type: type,
-                name: itemBase.name,
-                atk: itemBase.atk,
-                def: itemBase.def
-            };
-            
-            player.inventory.push(dropItem);
-            addLog(`🎁 宝箱から「${dropItem.name}」を見つけた！`, 'loot');
-        }
-    }
-
-    // 探索開始・終了
-    function startExploration(dungeonId) {
-        const d = DUNGEONS.find(x => x.id === dungeonId);
-        if (player.level < d.reqLv) {
-            alert(`レベルが足りません。推奨Lv: ${d.reqLv}`);
-            return;
+        // レベルアップとBP
+        if (data.exp >= data.lv * 10) {
+            data.lv++;
+            if (data.lv % 5 === 0) state.bp++;
         }
         
-        state.isExploring = true;
-        state.dungeonId = d.id;
-        state.startTime = Date.now();
-        state.endTime = state.startTime + (d.timeSec * 1000);
+        state.inventory = state.inventory.filter(i => i.id !== mId);
+        render();
+    }
+
+    function render() {
+        document.getElementById('miasma-lvl').innerText = state.miasma;
+        document.getElementById('bp-val').innerText = state.bp;
         
-        document.getElementById('ui-current-dungeon-name').innerText = `${d.name} を探索中`;
-        addLog(`🚶 ${d.name} へ出発した。帰還まで ${d.timeSec} 秒...`, 'system');
-        
-        saveData();
-        updateUI();
-    }
+        // DUNGEON
+        document.getElementById('dungeon-list').innerHTML = ["草むら", "峡谷", "魔王城"].map(n => 
+            `<div class="card"><h4>${n}</h4><button class="btn btn-main" onclick="runDungeon('${n}')">探索</button></div>`
+        ).join('');
 
-    function abortExploration() {
-        state.isExploring = false;
-        addLog(`🏃 探索を途中で切り上げて帰還した。`, 'system');
-        saveData();
-        updateUI();
-    }
+        // LOG
+        document.getElementById('log-list').innerHTML = state.logs.map(l => `<div class="log-item">${l}</div>`).join('');
 
-    function finishExploration(dungeon) {
-        state.isExploring = false;
-        addLog(`🏁 ${dungeon.name} の探索を完了した！`, 'system');
-        rollLoot(dungeon);
-        saveData();
-        updateUI();
-    }
-
-    // 装備処理
-    function equipItem(itemId) {
-        const item = player.inventory.find(i => i.id === itemId);
-        if (!item) return;
-
-        // 現在の装備を外してインベントリに戻す処理は省略（今回は単純上書き）
-        if (item.type === 'weapon') player.equipment.weapon = item;
-        if (item.type === 'armor') player.equipment.armor = item;
-        
-        saveData();
-        updateUI();
-        switchTab('status');
-    }
-
-    // ログ機能
-    function addLog(text, type = 'system') {
-        const time = new Date().toTimeString().slice(0,5);
-        state.logs.unshift({ time, text, type });
-        if (state.logs.length > 50) state.logs.pop(); // ログ上限
-        renderLogs();
-    }
-
-    // セーブ・ロード
-    function saveData() {
-        localStorage.setItem('whipper_save_player', JSON.stringify(player));
-        localStorage.setItem('whipper_save_state', JSON.stringify(state));
-    }
-    function loadData() {
-        const p = localStorage.getItem('whipper_save_player');
-        const s = localStorage.getItem('whipper_save_state');
-        if (p) player = JSON.parse(p);
-        if (s) state = JSON.parse(s);
-    }
-    function resetData() {
-        if(confirm("データを全て消去してLv1からやり直しますか？")) {
-            localStorage.clear();
-            location.reload();
-        }
-    }
-
-    /* ================= 描画・UI制御 ================= */
-    function switchTab(tabId) {
-        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-        document.getElementById(`view-${tabId}`).classList.add('active');
-        event.currentTarget.classList.add('active');
-        updateUI();
-    }
-
-    function updateUI() {
-        // ダンジョン画面切り替え
-        document.getElementById('ui-idle-state').style.display = state.isExploring ? 'none' : 'block';
-        document.getElementById('ui-explore-state').style.display = state.isExploring ? 'block' : 'none';
-        
-        // ステータス画面
-        document.getElementById('st-lv').innerText = player.level;
-        document.getElementById('st-exp').innerText = `${player.exp} / ${getExpNext()}`;
-        document.getElementById('st-hp').innerText = `${getMaxHp()} / ${getMaxHp()}`;
-        document.getElementById('st-atk').innerText = getAtk();
-        document.getElementById('st-def').innerText = getDef();
-        document.getElementById('st-str').innerText = player.str;
-        document.getElementById('st-vit').innerText = player.vit;
-        document.getElementById('st-spd').innerText = player.spd;
-        
-        document.getElementById('eq-weapon').innerText = player.equipment.weapon ? `${player.equipment.weapon.name} (ATK+${player.equipment.weapon.atk})` : 'なし';
-        document.getElementById('eq-armor').innerText = player.equipment.armor ? `${player.equipment.armor.name} (DEF+${player.equipment.armor.def})` : 'なし';
-
-        renderLogs();
-        renderInventory();
-    }
-
-    function renderDungeonList() {
-        const list = document.getElementById('dungeon-list');
-        list.innerHTML = '';
-        DUNGEONS.forEach(d => {
-            list.innerHTML += `
-                <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <div style="font-weight:bold;">${d.name}</div>
-                        <div style="font-size:0.8rem; color:var(--sub);">推奨Lv: ${d.reqLv} / 所要時間: ${d.timeSec}秒</div>
-                    </div>
-                    <button class="btn primary" style="width:auto;" onclick="startExploration('${d.id}')" ${player.level < d.reqLv ? 'disabled' : ''}>出発</button>
-                </div>
-            `;
-        });
-    }
-
-    function renderLogs() {
-        let html = '';
-        state.logs.forEach(log => {
-            html += `<div class="log-item ${log.type}">[${log.time}] ${log.text}</div>`;
-        });
-        document.getElementById('ui-full-logs').innerHTML = html;
-        document.getElementById('ui-explore-logs').innerHTML = state.logs.slice(0,3).map(log => `<div class="log-item ${log.type}">[${log.time}] ${log.text}</div>`).join('');
-    }
-
-    function renderInventory() {
-        const inv = document.getElementById('ui-inventory');
-        inv.innerHTML = '';
-        if (player.inventory.length === 0) {
-            inv.innerHTML = '<div style="color:var(--sub);text-align:center;margin-top:20px;">アイテムがありません</div>';
-            return;
-        }
-        player.inventory.forEach(item => {
-            let statText = item.type === 'weapon' ? `ATK: ${item.atk}` : `DEF: ${item.def}`;
-            let icon = item.type === 'weapon' ? '🗡️' : '🛡️';
+        // ITEM
+        const inv = document.getElementById('inventory-list');
+        inv.innerHTML = `<button class="btn" onclick="state.analysisState={stage:'selectTarget'};render()">解析モード開始</button>`;
+        state.inventory.forEach(i => {
+            const isHighlight = state.analysisState && (state.analysisState.targetId === i.id);
             inv.innerHTML += `
-                <div class="list-item">
-                    <div>
-                        <div style="font-weight:bold;">${icon} ${item.name}</div>
-                        <div style="font-size:0.8rem; color:var(--sub);">${statText}</div>
-                    </div>
-                    <button class="equip-btn" onclick="equipItem(${item.id})">装備</button>
+                <div class="item-row ${isHighlight ? 'highlight' : ''}" onclick="selectItem(${i.id})">
+                    <div>${i.name} ${i.equipped ? '[E]' : ''}<br><small>侵食:${i.erosion}</small></div>
+                    <div>ATK:${i.baseAtk + (i.erosion * 10)}</div>
                 </div>
             `;
         });
     }
 
-    // 起動
-    init();
+    render();
 </script>
 </body>
 </html>
