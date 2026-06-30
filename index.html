@@ -2,173 +2,109 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RPGハクスラ 完全版</title>
+    <title>RPG HACK & SLASH</title>
     <style>
-        :root { --bg: #121212; --card: #1e1e1e; --accent: #bb86fc; --text: #eee; }
-        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; }
-        .tab-content { display: none; padding: 15px; padding-bottom: 70px; }
-        .tab-content.active { display: block; }
-        .card { background: var(--card); border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
-        .btn { background: #333; color: white; border: none; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; }
-        .btn-main { background: var(--accent); color: #000; font-weight: bold; }
-        #nav { position: fixed; bottom: 0; width: 100%; display: flex; background: #000; border-top: 1px solid #444; }
-        #nav button { flex: 1; padding: 15px; background: none; border: none; color: #888; }
-        #nav button.active { color: var(--accent); }
-        .log-item { border-bottom: 1px solid #333; padding: 8px 0; font-size: 0.85rem; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #444; margin-bottom: 5px; cursor: pointer; }
-        .highlight { border-color: var(--accent); background: #2a2a2a; }
-        #overlay { position: fixed; top:0; left:0; width:100%; background: rgba(0,0,0,0.9); padding: 20px; box-sizing: border-box; display: none; }
+        body { background: #000; color: #fff; font-family: monospace; margin: 0; }
+        .tab { display: none; padding: 10px; }
+        .tab.active { display: block; }
+        .item-card { border: 1px solid #444; padding: 8px; margin: 5px 0; cursor: pointer; }
+        .rarity-1 { border-color: #fff; } /* 白 */
+        .rarity-2 { border-color: #00f; } /* 青 */
+        .rarity-3 { border-color: #ff0; } /* 黄 */
+        .rarity-4 { border-color: #f00; } /* 赤 */
+        #nav { position: fixed; bottom: 0; width: 100%; display: flex; background: #222; }
+        button { flex: 1; padding: 10px; border: none; background: #333; color: #fff; }
     </style>
 </head>
 <body>
 
-<main>
-    <section id="tab-dungeon" class="tab-content active">
-        <h3>DUNGEON (瘴気度: <span id="miasma-lvl">0</span>)</h3>
-        <div id="dungeon-list"></div>
-    </section>
+<div id="tab-dungeon" class="tab active">
+    <div id="dungeon-list"></div>
+</div>
+<div id="tab-log" class="tab"><div id="log-list"></div></div>
+<div id="tab-item" class="tab"><div id="inventory-list"></div></div>
+<div id="tab-status" class="tab"><div id="status-display"></div></div>
 
-    <section id="tab-log" class="tab-content">
-        <h3>探索履歴 (直近10件)</h3>
-        <div id="log-list"></div>
-    </section>
-
-    <section id="tab-item" class="tab-content">
-        <h3>ITEM (解析・装備)</h3>
-        <div id="analysis-guide" style="display:none; color:var(--accent);"></div>
-        <div id="inventory-list"></div>
-    </section>
-
-    <section id="tab-status" class="tab-content">
-        <h3>STATUS</h3>
-        <div class="card" id="status-display"></div>
-        <h4>永続ブースト (BP: <span id="bp-val">0</span>)</h4>
-        <div id="bp-upgrades"></div>
-    </section>
-</main>
-
-<nav id="nav">
-    <button onclick="showTab('tab-dungeon')" class="active">DUNGEON</button>
-    <button onclick="showTab('tab-log')">LOG</button>
-    <button onclick="showTab('tab-item')">ITEM</button>
-    <button onclick="showTab('tab-status')">STATUS</button>
-</nav>
+<div id="nav">
+    <button onclick="show('tab-dungeon')">DUNGEON</button>
+    <button onclick="show('tab-log')">LOG</button>
+    <button onclick="show('tab-item')">ITEM</button>
+    <button onclick="show('tab-status')">STATUS</button>
+</div>
 
 <script>
-    let state = {
-        miasma: 0,
-        bp: 0,
-        inventory: [],
-        logs: [],
-        dungeonClears: { "草むら": 0, "峡谷": 0, "魔王城": 0 },
-        analysisData: {}, // { name: { lv: 1, exp: 0 } }
-        stats: { str: 10, vit: 10, hp: 60 },
-        analysisState: null // { stage: 'selectTarget', targetId: null }
+const DB = {
+    weapons: ["木の棒", "鉄の剣", "ロングソード", "魔王の剣", "神殺しの槍"],
+    armor: ["布の服", "皮の鎧", "騎士の鎧", "聖女の衣", "魔王の鎧"],
+    acc: ["銅の指輪", "魔力石", "運命の首飾り", "七福の勾玉"],
+    abilities: ["一撃", "二撃", "先制", "不屈", "七福"]
+};
+
+let state = {
+    inventory: [], logs: [], miasma: 0, bp: 0, analysis: {},
+    analysisState: null // { target: null }
+};
+
+function show(id) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function generateItem(dungeon) {
+    const r = Math.random();
+    let rarity = r > 0.95 ? 4 : r > 0.8 ? 3 : r > 0.5 ? 2 : 1;
+    let type = ["weapons", "armor", "acc"][Math.floor(Math.random()*3)];
+    let name = DB[type][Math.floor(Math.random() * DB[type].length)];
+    let item = { 
+        id: Date.now() + Math.random(), name, rarity, 
+        base: Math.floor(Math.random()*100 * rarity), 
+        erosion: state.miasma * 10,
+        ability: (rarity >= 3) ? DB.abilities[Math.floor(Math.random()*DB.abilities.length)] : null
     };
+    return item;
+}
 
-    const BASE_ITEMS = [
-        { name: "木の棒", type: "weapon", baseAtk: 5, rarity: 1 },
-        { name: "なべのふた", type: "armor", baseDef: 5, rarity: 1 },
-        { name: "銅の指輪", type: "accessory", baseStats: 1, rarity: 1 }
-    ];
-
-    function showTab(id) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.querySelectorAll('#nav button').forEach(el => el.classList.remove('active'));
-        event.target.classList.add('active');
-    }
-
-    function runDungeon(name) {
-        const item = {
-            id: Date.now() + Math.random(),
-            ...BASE_ITEMS[Math.floor(Math.random()*BASE_ITEMS.length)],
-            erosion: state.miasma > 0 ? Math.floor(Math.random() * 50) : 0,
-            equipped: false
-        };
-        state.inventory.push(item);
-        state.dungeonClears[name] = 1; // 簡易的なクリア管理
-        
-        state.logs.unshift(`${name}帰還: ${item.name}を入手`);
-        if(state.logs.length > 10) state.logs.pop();
-
-        // 全クリア判定で瘴気度UP
-        if(Object.values(state.dungeonClears).every(c => c > 0)) {
-            state.miasma++;
-            state.dungeonClears = { "草むら": 0, "峡谷": 0, "魔王城": 0 };
-        }
-        render();
-    }
-
-    function selectItem(id) {
-        if (!state.analysisState) {
-            // 通常タップ: 詳細表示や装備切り替え
-            const item = state.inventory.find(i => i.id === id);
-            if (item) item.equipped = !item.equipped;
-        } else {
-            // 解析操作
-            if (state.analysisState.stage === 'selectTarget') {
-                const item = state.inventory.find(i => i.id === id);
-                if (item.equipped) return alert("装備中は不可");
-                state.analysisState = { stage: 'selectMaterial', targetId: id };
-            } else {
-                // 素材選択
-                if (state.analysisState.targetId === id) return alert("自分自身は不可");
-                executeAnalysis(state.analysisState.targetId, id);
-                state.analysisState = null;
-            }
-        }
-        render();
-    }
-
-    function executeAnalysis(tId, mId) {
-        const target = state.inventory.find(i => i.id === tId);
-        const mat = state.inventory.find(i => i.id === mId);
-        if (target.name !== mat.name) return alert("同じ装備のみ合成可能");
-        
-        // EXP加算
-        if(!state.analysisData[target.name]) state.analysisData[target.name] = { lv: 1, exp: 0 };
-        const data = state.analysisData[target.name];
-        data.exp += (mat.rarity * 1); // 簡易レアリティ補正
-        
-        // レベルアップとBP
-        if (data.exp >= data.lv * 10) {
-            data.lv++;
-            if (data.lv % 5 === 0) state.bp++;
-        }
-        
-        state.inventory = state.inventory.filter(i => i.id !== mId);
-        render();
-    }
-
-    function render() {
-        document.getElementById('miasma-lvl').innerText = state.miasma;
-        document.getElementById('bp-val').innerText = state.bp;
-        
-        // DUNGEON
-        document.getElementById('dungeon-list').innerHTML = ["草むら", "峡谷", "魔王城"].map(n => 
-            `<div class="card"><h4>${n}</h4><button class="btn btn-main" onclick="runDungeon('${n}')">探索</button></div>`
-        ).join('');
-
-        // LOG
-        document.getElementById('log-list').innerHTML = state.logs.map(l => `<div class="log-item">${l}</div>`).join('');
-
-        // ITEM
-        const inv = document.getElementById('inventory-list');
-        inv.innerHTML = `<button class="btn" onclick="state.analysisState={stage:'selectTarget'};render()">解析モード開始</button>`;
-        state.inventory.forEach(i => {
-            const isHighlight = state.analysisState && (state.analysisState.targetId === i.id);
-            inv.innerHTML += `
-                <div class="item-row ${isHighlight ? 'highlight' : ''}" onclick="selectItem(${i.id})">
-                    <div>${i.name} ${i.equipped ? '[E]' : ''}<br><small>侵食:${i.erosion}</small></div>
-                    <div>ATK:${i.baseAtk + (i.erosion * 10)}</div>
-                </div>
-            `;
-        });
-    }
-
+function runDungeon(dungeon) {
+    let item = generateItem(dungeon);
+    state.inventory.push(item);
+    state.logs.unshift(`${dungeon}で ${item.name} を入手`);
     render();
+}
+
+function analyze(targetId, materialId) {
+    let target = state.inventory.find(i => i.id === targetId);
+    let mat = state.inventory.find(i => i.id === materialId);
+    if(target.name !== mat.name) return alert("同名装備のみ");
+    
+    if(!state.analysis[target.name]) state.analysis[target.name] = { lv: 1, exp: 0 };
+    let data = state.analysis[target.name];
+    data.exp += mat.rarity;
+    if(data.exp >= data.lv * 10) { data.lv++; if(data.lv % 5 === 0) state.bp++; }
+    
+    state.inventory = state.inventory.filter(i => i.id !== materialId);
+    state.analysisState = null;
+    render();
+}
+
+function render() {
+    document.getElementById('dungeon-list').innerHTML = ["草むら", "峡谷", "魔王城"].map(d => 
+        `<div class="item-card" onclick="runDungeon('${d}')">${d} 探索</div>`
+    ).join('');
+    
+    document.getElementById('inventory-list').innerHTML = state.inventory.map(i => `
+        <div class="item-card rarity-${i.rarity}" onclick="
+            if(!state.analysisState) state.analysisState = {target: i.id};
+            else analyze(state.analysisState.target, i.id);
+        ">
+            ${i.name} (Lv:${state.analysis[i.name]?.lv || 1})<br>
+            ATK:${i.base + i.erosion} ${i.ability ? '| ' + i.ability : ''}
+        </div>
+    `).join('');
+    
+    document.getElementById('status-display').innerText = `BP: ${state.bp}`;
+    document.getElementById('log-list').innerHTML = state.logs.map(l => `<div>${l}</div>`).join('');
+}
+render();
 </script>
 </body>
 </html>
