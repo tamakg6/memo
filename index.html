@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whipper Clone - 放置RPG</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --accent-color: #4CAF50;
+            --border-color: #333;
+        }
+        body {
+            font-family: 'Courier New', Consolas, monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        #app {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            background-color: #000;
+            border-left: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        h1, h2, h3 {
+            color: var(--accent-color);
+            text-align: center;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+        button {
+            background-color: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            padding: 8px 12px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 5px;
+            font-family: inherit;
+        }
+        button:hover:not(:disabled) {
+            background-color: var(--accent-color);
+            color: #000;
+        }
+        button:disabled {
+            border-color: #555;
+            color: #555;
+            cursor: not-allowed;
+        }
+        .item-list {
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #222;
+            padding: 5px 0;
+        }
+        .item-actions button {
+            width: auto;
+            padding: 3px 8px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+            margin-top: 0;
+        }
+        #log-box {
+            height: 200px;
+            overflow-y: auto;
+            background-color: #111;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #222;
+            margin: 10px 0;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: var(--accent-color);
+            width: 0%;
+            transition: width 0.5s linear;
+        }
+        .dungeon-btn {
+            display: flex;
+            justify-content: space-between;
+        }
+        .curse-text {
+            color: #ff5555;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="screen-home">
+        <h1>Whipper Clone</h1>
+        <p class="curse-text">【魔王の呪い】帰還時、冒険者は必ずLv1に戻る。</p>
+        
+        <div class="section">
+            <h2>ステータス (Lv.1固定)</h2>
+            <div class="status-grid" id="status-display">
+                </div>
+            <div style="margin-top: 10px; border-top: 1px dashed #333; padding-top: 10px;">
+                <div id="equip-weapon">武器: なし</div>
+                <div id="equip-armor">防具: なし</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>ダンジョン派遣</h2>
+            <button class="dungeon-btn" onclick="startAdventure(1)">はじまりの洞窟 <span>(30秒)</span></button>
+            <button class="dungeon-btn" onclick="startAdventure(2)">迷いの森 <span>(3分)</span></button>
+            <button class="dungeon-btn" onclick="startAdventure(3)">魔王の城 <span>(10分)</span></button>
+        </div>
+
+        <div class="section">
+            <h2>所持品 (装備・売却)</h2>
+            <div class="item-list" id="inventory-list">
+                </div>
+        </div>
+    </div>
+
+    <div id="screen-adventure" style="display: none;">
+        <h1>探索中...</h1>
+        <div class="section">
+            <h2 id="current-dungeon-name">ダンジョン名</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div style="text-align: center; margin-bottom: 10px;">残り時間: <span id="time-remain">--</span></div>
+            <div id="log-box"></div>
+        </div>
+        <button id="btn-force-return" onclick="forceReturn()">撤退する（戦利品を破棄）</button>
+    </div>
+
+    <div id="screen-result" style="display: none;">
+        <h1>帰還報告</h1>
+        <p class="curse-text">魔王の呪いが発動し、冒険者のレベルが1に戻った。</p>
+        <div class="section">
+            <h2>獲得した戦利品</h2>
+            <div class="item-list" id="loot-list"></div>
+        </div>
+        <button onclick="returnToHome()">街へ戻る</button>
+    </div>
+</div>
+
+<script>
+    // --- データ定義 ---
+    const DUNGEONS = {
+        1: { name: "はじまりの洞窟", time: 30, level: 1 },
+        2: { name: "迷いの森", time: 180, level: 3 },
+        3: { name: "魔王の城", time: 600, level: 10 }
+    };
+
+    const BASE_STATS = { hp: 50, atk: 5, def: 5 };
+
+    // --- 状態管理 ---
+    let state = {
+        inventory: [],
+        equipWeapon: null,
+        equipArmor: null,
+        isExploring: false,
+        dungeonId: null,
+        startTime: null,
+        endTime: null,
+        logs: []
+    };
+
+    let loopInterval;
+
+    // --- ロード & セーブ ---
+    function loadState() {
+        const saved = localStorage.getItem('whipper_clone_data');
+        if (saved) {
+            state = JSON.parse(saved);
+        }
+    }
+
+    function saveState() {
+        localStorage.setItem('whipper_clone_data', JSON.stringify(state));
+    }
+
+    // --- ユーティリティ ---
+    function switchScreen(screenId) {
+        document.getElementById('screen-home').style.display = 'none';
+        document.getElementById('screen-adventure').style.display = 'none';
+        document.getElementById('screen-result').style.display = 'none';
+        document.getElementById(screenId).style.display = 'block';
+    }
+
+    function getPlayerStats() {
+        let stats = { ...BASE_STATS };
+        if (state.equipWeapon) {
+            stats.atk += state.equipWeapon.atk;
+        }
+        if (state.equipArmor) {
+            stats.hp += state.equipArmor.hp;
+            stats.def += state.equipArmor.def;
+        }
+        return stats;
+    }
+
+    // --- UI更新 ---
+    function updateHomeUI() {
+        const stats = getPlayerStats();
+        document.getElementById('status-display').innerHTML = `
+            <div>HP: ${stats.hp}</div>
+            <div>ATK: ${stats.atk}</div>
+            <div>DEF: ${stats.def}</div>
+        `;
+
+        document.getElementById('equip-weapon').innerText = `武器: ${state.equipWeapon ? state.equipWeapon.name + ' (ATK+'+state.equipWeapon.atk+')' : 'なし'}`;
+        document.getElementById('equip-armor').innerText = `防具: ${state.equipArmor ? state.equipArmor.name + ' (DEF+'+state.equipArmor.def+' HP+'+state.equipArmor.hp+')' : 'なし'}`;
+
+        const invList = document.getElementById('inventory-list');
+        invList.innerHTML = '';
+        if (state.inventory.length === 0) invList.innerHTML = '<p>所持品はありません</p>';
+        
+        state.inventory.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'item';
+            
+            let statsText = item.type === 'weapon' ? `ATK:${item.atk}` : `DEF:${item.def} HP:${item.hp}`;
+            let typeText = item.type === 'weapon' ? '🗡️' : '🛡️';
+
+            div.innerHTML = `
+                <div>${typeText} ${item.name}<br><span style="color:#888;">${statsText}</span></div>
+                <div class="item-actions">
+                    <button onclick="equipItem(${item.id})">装備</button>
+                    <button onclick="discardItem(${item.id})">捨てる</button>
+                </div>
+            `;
+            invList.appendChild(div);
+        });
+    }
+
+    // --- 装備・アイテム管理 ---
+    function equipItem(id) {
+        const itemIndex = state.inventory.findIndex(i => i.id === id);
+        if (itemIndex === -1) return;
+        
+        const item = state.inventory.splice(itemIndex, 1)[0];
+        
+        if (item.type === 'weapon') {
+            if (state.equipWeapon) state.inventory.push(state.equipWeapon);
+            state.equipWeapon = item;
+        } else {
+            if (state.equipArmor) state.inventory.push(state.equipArmor);
+            state.equipArmor = item;
+        }
+        saveState();
+        updateHomeUI();
+    }
+
+    function discardItem(id) {
+        state.inventory = state.inventory.filter(i => i.id !== id);
+        saveState();
+        updateHomeUI();
+    }
+
+    // --- 探索ロジック ---
+    function startAdventure(dungeonId) {
+        const dungeon = DUNGEONS[dungeonId];
+        state.isExploring = true;
+        state.dungeonId = dungeonId;
+        state.startTime = Date.now();
+        state.endTime = Date.now() + (dungeon.time * 1000);
+        state.logs = [`[00:00] ${dungeon.name} への探索を開始した。`];
+        
+        saveState();
+        prepareAdventureScreen();
+    }
+
+    function prepareAdventureScreen() {
+        switchScreen('screen-adventure');
+        document.getElementById('current-dungeon-name').innerText = DUNGEONS[state.dungeonId].name;
+        document.getElementById('log-box').innerHTML = state.logs.join('<br>');
+        
+        clearInterval(loopInterval);
+        loopInterval = setInterval(gameLoop, 1000);
+        gameLoop(); // 即時反映
+    }
+
+    function addLog(text) {
+        const dungeon = DUNGEONS[state.dungeonId];
+        const elapsedSec = Math.floor((Date.now() - state.startTime) / 1000);
+        const m = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
+        const s = String(elapsedSec % 60).padStart(2, '0');
+        const logLine = `[${m}:${s}] ${text}`;
+        state.logs.push(logLine);
+        
+        const logBox = document.getElementById('log-box');
+        logBox.innerHTML = state.logs.join('<br>');
+        logBox.scrollTop = logBox.scrollHeight;
+        saveState();
+    }
+
+    function gameLoop() {
+        if (!state.isExploring) return;
+
+        const now = Date.now();
+        const totalDuration = state.endTime - state.startTime;
+        const remain = Math.max(0, state.endTime - now);
+        const progress = Math.min(100, ((totalDuration - remain) / totalDuration) * 100);
+
+        document.getElementById('progress-fill').style.width = `${progress}%`;
+        document.getElementById('time-remain').innerText = Math.ceil(remain / 1000) + '秒';
+
+        // ランダムなフレーバーテキストの生成
+        if (remain > 2000 && Math.random() < 0.15) {
+            const events = ["モンスターと交戦中...", "罠を回避した", "奥へと進んでいる...", "少し休憩した"];
+            addLog(events[Math.floor(Math.random() * events.length)]);
+        }
+
+        // 探索完了
+        if (now >= state.endTime) {
+            clearInterval(loopInterval);
+            finishAdventure();
+        }
+    }
+
+    function forceReturn() {
+        if (confirm("撤退すると戦利品は得られません。本当によろしいですか？")) {
+            clearInterval(loopInterval);
+            state.isExploring = false;
+            saveState();
+            switchScreen('screen-home');
+            updateHomeUI();
+        }
+    }
+
+    function finishAdventure() {
+        const dungeon = DUNGEONS[state.dungeonId];
+        state.isExploring = false;
+        
+        // ハクスラ・ドロップ生成 (ダンジョンのレベルに応じて強力に)
+        const lootCount = 1 + Math.floor(Math.random() * 3); // 1~3個のドロップ
+        const acquired = [];
+        
+        for (let i = 0; i < lootCount; i++) {
+            acquired.push(generateLoot(dungeon.level));
+        }
+        
+        // インベントリに追加
+        state.inventory = state.inventory.concat(acquired);
+        saveState();
+
+        // リザルト画面描画
+        const lootList = document.getElementById('loot-list');
+        lootList.innerHTML = '';
+        if(acquired.length === 0) lootList.innerHTML = '戦利品はなかった...';
+
+        acquired.forEach(item => {
+            let statsText = item.type === 'weapon' ? `ATK:${item.atk}` : `DEF:${item.def} HP:${item.hp}`;
+            lootList.innerHTML += `<div class="item">${item.type==='weapon'?'🗡️':'🛡️'} ${item.name} <span style="color:#888; font-size:0.8rem;">(${statsText})</span></div>`;
+        });
+
+        switchScreen('screen-result');
+    }
+
+    function generateLoot(dungeonLevel) {
+        const isWeapon = Math.random() > 0.5;
+        const rarity = Math.floor(Math.random() * 3); // 0:普通 1:良 2:レア
+        
+        const prefixes = ["なまくらな", "普通の", "業物", "伝説の"];
+        const wNames = ["ダガー", "ロングソード", "バトルアックス", "エクスカリバー"];
+        const aNames = ["旅人の服", "レザーアーマー", "チェインメイル", "竜騎士の鎧"];
+
+        const nameIndex = Math.min(dungeonLevel, 3);
+
+        const item = {
+            id: Date.now() + Math.floor(Math.random()*10000),
+            type: isWeapon ? 'weapon' : 'armor',
+            name: prefixes[rarity] + (isWeapon ? wNames[nameIndex] : aNames[nameIndex]),
+            atk: 0, def: 0, hp: 0
+        };
+
+        // ランダム値の付与 (ダンジョンLvとレア度でスケール)
+        const base = (dungeonLevel * 3) + (rarity * 5) + Math.floor(Math.random() * 5) + 1;
+        
+        if (isWeapon) {
+            item.atk = base;
+        } else {
+            item.def = Math.floor(base / 2) + 1;
+            item.hp = base * 3;
+        }
+        
+        return item;
+    }
+
+    function returnToHome() {
+        switchScreen('screen-home');
+        updateHomeUI();
+    }
+
+    // --- 初期化 ---
+    window.onload = function() {
+        loadState();
+        if (state.isExploring) {
+            const now = Date.now();
+            if (now >= state.endTime) {
+                // オフライン中に完了していた場合
+                addLog("... (オフラインで探索を進めました) ...");
+                addLog("無事にダンジョンを踏破した！");
+                finishAdventure();
+            } else {
+                // まだ探索中の場合
+                prepareAdventureScreen();
+            }
+        } else {
+            switchScreen('screen-home');
+            updateHomeUI();
+        }
+    };
+</script>
+</body>
+</html>
