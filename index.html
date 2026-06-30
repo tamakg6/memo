@@ -3,802 +3,440 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Whipper+ Complete Clone</title>
+    <title>Whipper System Clone</title>
     <style>
         :root {
-            --bg-main: #141414;
-            --bg-panel: #262626;
-            --bg-dark: #0f0f0f;
-            --text-main: #e0e0e0;
-            --text-sub: #8a8a8a;
-            --accent-purple: #7a22ff;
-            --accent-blue: #0076ff;
-            --text-red: #ff4545;
-            --border-color: #3a3a3a;
+            --bg: #141414; --panel: #262626; --text: #e0e0e0; --sub: #8a8a8a;
+            --accent: #7a22ff; --border: #3a3a3a; --red: #ff4545;
         }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Yu Gothic", YuGothic, sans-serif;
-            background-color: #000;
-            color: var(--text-main);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            user-select: none;
+            font-family: sans-serif; background: #000; color: var(--text);
+            margin: 0; display: flex; justify-content: center; user-select: none;
         }
-
         #app {
-            width: 100%;
-            max-width: 450px;
-            height: 100vh;
-            background-color: var(--bg-main);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            box-sizing: border-box;
-            border-left: 1px solid var(--border-color);
-            border-right: 1px solid var(--border-color);
-            overflow: hidden;
+            width: 100%; max-width: 450px; height: 100vh; background: var(--bg);
+            display: flex; flex-direction: column; border: 1px solid var(--border);
+            position: relative; overflow: hidden;
         }
-
-        /* ヘッダー UI */
-        header {
-            height: 50px;
-            background-color: var(--bg-main);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 15px;
-            font-size: 0.9rem;
-        }
-        .header-left { font-size: 1.2rem; cursor: pointer; }
-        .header-center { text-align: center; }
-        .header-time { font-size: 1.1rem; font-weight: bold; }
-        .header-remain { font-size: 0.75rem; color: var(--text-sub); }
-        .header-right { display: flex; gap: 15px; }
-        .icon-btn { cursor: pointer; font-size: 1.2rem; }
-
-        /* メイン表示領域 */
-        main {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-            padding-bottom: 80px;
-        }
+        header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; }
         .screen { display: none; }
         .screen.active { display: block; }
-
-        /* ダンジョン画面 (IMG_2894) */
-        .dungeon-title-area {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .dungeon-title { font-size: 1.1rem; font-weight: bold; margin: 0; }
-        .btn-reserve {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-        }
-        .dungeon-card {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-        .return-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .return-label { color: var(--text-sub); font-size: 0.85rem; }
-        .return-clock { font-size: 1.8rem; font-weight: bold; font-family: monospace; }
-        .progress-container {
-            background-color: #333;
-            border-radius: 6px;
-            height: 12px;
-            width: 100%;
-            overflow: hidden;
-            position: relative;
-            margin-bottom: 8px;
-        }
-        .progress-bar {
-            background-color: var(--accent-purple);
-            height: 100%;
-            width: 0%;
-            transition: width 1s linear;
-        }
-        .progress-text { text-align: center; font-size: 0.85rem; color: var(--text-sub); margin-bottom: 15px; }
-        .dungeon-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-action {
-            padding: 10px;
-            border-radius: 8px;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-        .btn-return { background-color: #444; color: var(--text-main); }
-        .btn-loot { background-color: var(--accent-purple); color: #fff; }
-
-        /* 探索リスト (未派遣時) */
-        .dungeon-select-item {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
-        .dungeon-select-item:hover { border-color: var(--accent-purple); }
-
-        /* 探索ログリスト */
-        .log-header { font-size: 0.9rem; color: var(--text-sub); margin: 15px 0 8px 0; display: flex; align-items: center; gap: 5px; }
-        .log-list { display: flex; flex-direction: column; gap: 8px; }
-        .log-item {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-        }
-        .log-item-left { display: flex; gap: 10px; align-items: center; }
-        .log-item-icon { width: 36px; height: 36px; background-color: #333; border-radius: 6px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; }
-        .log-item-details { font-size: 0.8rem; }
-        .log-item-title { font-size: 0.9rem; margin-bottom: 2px; }
-        .log-item-sub { color: var(--text-sub); font-size: 0.75rem; }
-        .log-item-arrow { color: var(--text-sub); }
-
-        /* アイテム画面 (IMG_2896) */
-        .item-sub-nav { display: flex; justify-content: space-around; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px; }
-        .item-nav-btn { font-size: 1.3rem; cursor: pointer; opacity: 0.5; padding: 5px; }
-        .item-nav-btn.active { opacity: 1; border-bottom: 2px solid var(--accent-purple); }
-        .item-options { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--text-sub); margin-bottom: 10px; }
-        .item-card {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-        }
-        .item-card-left { display: flex; gap: 12px; align-items: center; }
-        .item-img-box {
-            width: 44px;
-            height: 44px;
-            background-color: #333;
-            border-radius: 6px;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.4rem;
-        }
-        .item-equip-badge {
-            position: absolute;
-            top: -4px; left: -4px;
-            background-color: #ff6b00;
-            color: #fff;
-            font-size: 0.6rem;
-            font-weight: bold;
-            padding: 1px 3px;
-            border-radius: 3px;
-        }
-        .item-level-badge {
-            position: absolute;
-            bottom: 2px; right: 2px;
-            font-size: 0.65rem;
-            color: #7a22ff;
-            font-family: monospace;
-        }
-        .item-name-line { font-size: 0.9rem; font-weight: bold; margin-bottom: 4px; }
-        .item-name-line.rare { color: var(--text-red); }
-        .item-skills { font-size: 0.75rem; color: var(--text-sub); line-height: 1.3; }
-
-        /* ステータス画面 (IMG_2897) */
-        .profile-section { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
-        .profile-left { display: flex; gap: 12px; align-items: center; }
-        .profile-avatar { width: 48px; height: 48px; background-color: #555; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 1.6rem; }
-        .profile-name-box { background-color: var(--bg-panel); padding: 6px 15px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; width: 140px; justify-content: space-between; }
-        .status-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 15px; }
-        .status-tab-btn { background-color: #222; border: 1px solid var(--border-color); color: var(--text-sub); text-align: center; padding: 6px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
-        .status-tab-btn.active { background-color: var(--bg-panel); color: var(--text-main); border-color: #555; }
         
-        .status-grid-container { display: grid; grid-template-columns: 1fr 1.2fr; gap: 10px; margin-bottom: 15px; }
-        .status-block { background-color: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; font-size: 0.85rem; }
-        .status-block-title { border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 8px; text-align: center; color: var(--text-sub); font-size: 0.8rem; }
-        .status-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
-        .status-val { font-family: monospace; }
-        .status-val.red { color: var(--text-red); }
+        /* UI Elements */
+        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .btn { background: #444; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
+        .btn.primary { background: var(--accent); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        .rating-box { background-color: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 0.95rem; }
-        .rating-num { font-family: monospace; font-weight: bold; }
-
-        .equip-details-box { background-color: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; }
-        .equip-detail-item { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
-        .equip-detail-text { font-size: 0.8rem; }
-        .equip-detail-name { font-weight: bold; color: var(--text-red); margin-bottom: 2px; }
-        .equip-detail-sub { color: var(--text-sub); font-size: 0.75rem; line-height: 1.3; }
-
-        /* ポップアップ共通 */
-        .popup-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.85);
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .popup-window {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            width: 100%;
-            max-width: 360px;
-            padding: 15px;
-            box-sizing: border-box;
-        }
-        .popup-header { font-size: 0.95rem; font-weight: bold; text-align: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
-        .popup-close-btn { background-color: #444; color: white; border: none; width: 100%; padding: 10px; border-radius: 8px; margin-top: 15px; cursor: pointer; font-size: 0.9rem; }
-
-        /* 戦闘ログ詳細ポップアップ (IMG_2895) */
-        .battle-log-node {
-            background-color: #1a1a1a;
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 8px;
-            font-size: 0.78rem;
-            line-height: 1.4;
-            border-left: 3px solid var(--text-sub);
-        }
-        .battle-log-node.attack { border-left-color: var(--text-red); }
-        .battle-log-node.victory { border-left-color: var(--accent-blue); }
-
-        /* 図鑑画面 (IMG_2898 / 2899) */
-        .book-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 400px; overflow-y: auto; }
-        .book-card { background-color: #1c1c1c; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; display: flex; gap: 8px; align-items: center; cursor: pointer; }
-        .book-card-info { font-size: 0.75rem; }
-        .book-card-name { font-weight: bold; font-size: 0.85rem; margin-bottom: 2px; }
-        .book-detail-flex { display: flex; gap: 15px; font-size: 0.8rem; margin-bottom: 12px; }
-        .book-detail-section { background-color: #1a1a1a; border-radius: 8px; padding: 10px; margin-bottom: 8px; font-size: 0.78rem; }
-        .book-detail-title { color: var(--text-sub); font-size: 0.75rem; margin-bottom: 4px; border-bottom: 1px solid #333; padding-bottom: 2px; }
-
-        /* フッタータブバー */
+        /* Progress */
+        .progress-bg { background: #333; height: 10px; border-radius: 5px; overflow: hidden; margin: 10px 0; }
+        .progress-bar { background: var(--accent); height: 100%; width: 0%; transition: width 1s linear; }
+        
+        /* Logs */
+        .log-item { background: var(--panel); padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; border-left: 3px solid #555; }
+        .log-item.battle { border-left-color: var(--red); }
+        .log-item.loot { border-left-color: #00ff66; }
+        
+        /* Items & Status */
+        .list-item { background: var(--panel); border: 1px solid var(--border); padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .equip-btn { background: var(--accent); border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .stat-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.9rem; border-bottom: 1px solid #333; }
+        
+        /* Footer Tabs */
         footer {
-            position: absolute;
-            bottom: 0; left: 0; width: 100%;
-            height: 65px;
-            background-color: var(--bg-main);
-            border-top: 1px solid var(--border-color);
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            z-index: 900;
+            position: absolute; bottom: 0; width: 100%; height: 60px; background: var(--bg);
+            border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(4, 1fr);
         }
-        .tab-btn {
-            background: none; border: none; color: var(--text-sub);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 0.65rem; font-weight: bold; gap: 4px;
-        }
-        .tab-btn.active { color: var(--text-main); }
-        .tab-btn-icon { font-size: 1.3rem; opacity: 0.6; }
-        .tab-btn.active .tab-btn-icon { opacity: 1; color: var(--accent-purple); }
+        .tab { background: none; border: none; color: var(--sub); cursor: pointer; font-size: 0.75rem; font-weight: bold; }
+        .tab.active { color: white; border-top: 2px solid var(--accent); }
     </style>
 </head>
 <body>
 
 <div id="app">
     <header>
-        <div class="header-left">≡</div>
-        <div class="header-center">
-            <div class="header-time" id="global-clock">13:55</div>
-            <div class="header-remain" id="global-remain">(あと2時間21分)</div>
-        </div>
-        <div class="header-right">
-            <div class="icon-btn" onclick="openBookPopup()">📖</div>
-            <div class="icon-btn">✉️</div>
-        </div>
+        <div>Whipper System</div>
+        <div id="ui-time">--:--</div>
+        <div class="btn" style="width:auto; padding:4px 8px; font-size:0.8rem; background:#666;" onclick="resetData()">データ初期化</div>
     </header>
 
     <main>
         <section id="view-dungeon" class="screen active">
-            <div id="dungeon-active-ui">
-                <div class="dungeon-title-area">
-                    <h2 class="dungeon-title" id="active-dungeon-name">勇気の峡谷（瘴気濃度1）14階へ</h2>
-                    <button class="btn-reserve">📅 予約</button>
-                </div>
-                <div class="dungeon-card">
-                    <div class="return-info">
-                        <div class="return-label">🕒 帰還時刻</div>
-                        <div class="return-clock" id="ui-return-time">16:16</div>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-bar" id="ui-progress-bar"></div>
-                    </div>
-                    <div class="progress-text" id="ui-progress-floor">6階を探索中</div>
-                    <div class="dungeon-buttons">
-                        <button class="btn-action btn-return" onclick="abortExploration()">↷ 途中帰還</button>
-                        <button class="btn-action btn-loot">▤ 戦利品</button>
-                    </div>
-                </div>
+            <div id="ui-idle-state">
+                <h3>ダンジョン選択</h3>
+                <div id="dungeon-list"></div>
             </div>
-
-            <div id="dungeon-select-ui" style="display: none;">
-                <h3 style="font-size: 1rem; margin-bottom: 10px; color: var(--text-sub);">派遣するダンジョンを選択</h3>
-                <div id="dungeon-selection-list">
-                    </div>
-            </div>
-
-            <div class="log-header">📖 探索の記録</div>
-            <div class="log-list" id="ui-log-list">
+            
+            <div id="ui-explore-state" style="display:none;">
+                <h3 id="ui-current-dungeon-name">探索中...</h3>
+                <div class="card">
+                    <div style="text-align: center; font-size: 0.8rem; color: var(--sub);">帰還まで</div>
+                    <div id="ui-time-remain" style="text-align: center; font-size: 2rem; font-family: monospace;">00:00</div>
+                    <div class="progress-bg"><div class="progress-bar" id="ui-progress"></div></div>
+                    <button class="btn" onclick="abortExploration()">探索を中断する</button>
                 </div>
+                <div id="ui-explore-logs"></div>
+            </div>
         </section>
 
         <section id="view-log" class="screen">
-            <div style="text-align: center; color: var(--text-sub); margin-top: 40px;">
-                DUNGEONタブの「探索の記録」から各ログの詳細を確認できます。
-            </div>
+            <h3>探索の記録</h3>
+            <div id="ui-full-logs"></div>
         </section>
 
         <section id="view-item" class="screen">
-            <div class="item-sub-nav">
-                <span class="item-nav-btn active">🗡️</span>
-                <span class="item-nav-btn">🛡️</span>
-                <span class="item-nav-btn">💍</span>
-                <span class="item-nav-btn">🧪</span>
-            </div>
-            <div class="item-options">
-                <label><input type="checkbox" checked> 装備品を最上部に固定</label>
-                <span>↑↓能力数</span>
-                <span>絞り込み ▽</span>
-            </div>
-            <div id="ui-item-list">
-                </div>
+            <h3>所持品</h3>
+            <div id="ui-inventory"></div>
         </section>
 
         <section id="view-status" class="screen">
-            <div class="profile-section">
-                <div class="profile-left">
-                    <div class="profile-avatar">🧙</div>
-                    <div class="profile-name-box">
-                        <span id="ui-char-name">たま</span>
-                        <span>✏️</span>
-                    </div>
-                </div>
-                <button class="btn-reserve" style="padding: 6px 10px;">👕 着替え</button>
+            <h3>ステータス</h3>
+            <div class="card">
+                <div class="stat-row"><span>名前</span><span id="st-name">たま</span></div>
+                <div class="stat-row"><span>レベル</span><span id="st-lv">1</span></div>
+                <div class="stat-row"><span>EXP</span><span id="st-exp">0 / 10</span></div>
             </div>
-
-            <div class="status-tabs">
-                <div class="status-tab-btn active">🏋️つよさ</div>
-                <div class="status-tab-btn">✨永続ブースト</div>
-                <div class="status-tab-btn">📜記録</div>
+            <div class="card">
+                <div class="stat-row"><span>HP</span><span id="st-hp">20 / 20</span></div>
+                <div class="stat-row"><span>ATK (攻撃力)</span><span id="st-atk" style="color:var(--red);">5</span></div>
+                <div class="stat-row"><span>DEF (防御力)</span><span id="st-def">1</span></div>
+                <div class="stat-row"><span>STR (腕力)</span><span id="st-str">5</span></div>
+                <div class="stat-row"><span>VIT (体力)</span><span id="st-vit">5</span></div>
+                <div class="stat-row"><span>SPD (敏捷)</span><span id="st-spd">5</span></div>
             </div>
-
-            <div class="status-grid-container">
-                <div class="status-block">
-                    <div class="status-block-title">装備品</div>
-                    <div class="status-row"><span>武器:</span><span style="color:var(--text-red)">こん棒</span></div>
-                    <div class="status-row"><span>盾:</span><span style="color:var(--text-red)">堅木の盾</span></div>
-                    <div class="status-row"><span>指輪:</span><span style="color:var(--text-red)">銅の指輪</span></div>
-                    <div style="border-top:1px solid #333; margin: 8px 0;"></div>
-                    <div class="status-row" style="font-size:0.75rem;"><span>武器攻撃力:</span><span class="status-val">2,619</span></div>
-                    <div class="status-row" style="font-size:0.75rem;"><span>盾守備力:</span><span class="status-val">1,140</span></div>
-                </div>
-                <div class="status-block">
-                    <div class="status-block-title">つよさ (Lv14)</div>
-                    <div class="status-row"><span>HP:</span><span class="status-val">317</span></div>
-                    <div class="status-row"><span>STR:</span><span class="status-val red">11,043</span></div>
-                    <div class="status-row"><span>VIT:</span><span class="status-val">12</span></div>
-                    <div class="status-row"><span>SPD:</span><span class="status-val">15</span></div>
-                    <div class="status-row"><span>LUK:</span><span class="status-val">1</span></div>
-                </div>
-            </div>
-
-            <div class="rating-box">
-                <span>強さレーティング</span>
-                <span class="rating-num red" id="ui-rating-num">15,486</span>
-            </div>
-
-            <div class="equip-details-box">
-                <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:4px;">装備詳細</div>
-                <div class="equip-detail-item">
-                    <div style="font-size:1.5rem;">🗡️</div>
-                    <div class="equip-detail-text">
-                        <div class="equip-detail-name">こん棒 (ATK:2,619) <span style="color:var(--accent-purple)">~200</span></div>
-                        <div class="equip-detail-sub">腕力 Lv12<br>&nbsp;&nbsp;STRの基礎値が750アップ</div>
-                        <div class="equip-detail-sub">腕力 Lv12<br>&nbsp;&nbsp;STRの基礎値が750アップ</div>
-                        <div class="equip-detail-sub">腕力 Lv12<br>&nbsp;&nbsp;STRの基礎値が750アップ</div>
-                    </div>
-                </div>
-                <div class="equip-detail-item">
-                    <div style="font-size:1.5rem;">🛡️</div>
-                    <div class="equip-detail-text">
-                        <div class="equip-detail-name" style="color:#ffae00">堅木の盾 +140 (DEF:1,140) <span style="color:var(--accent-purple)">~96</span></div>
-                        <div class="equip-detail-sub">腕力 Lv13<br>&nbsp;&nbsp;STRの基礎値が1,000アップ</div>
-                        <div class="equip-detail-sub">腕力 Lv11<br>&nbsp;&nbsp;STRの基礎値が500アップ</div>
-                        <div class="equip-detail-sub">腕力 Lv11<br>&nbsp;&nbsp;STRの基礎値が500アップ</div>
-                    </div>
-                </div>
+            <h3>装備</h3>
+            <div class="card">
+                <div class="stat-row"><span>武器</span><span id="eq-weapon">なし</span></div>
+                <div class="stat-row"><span>防具</span><span id="eq-armor">なし</span></div>
             </div>
         </section>
     </main>
 
-    <div class="popup-overlay" id="popup-battle-detail" style="display: none;">
-        <div class="popup-window">
-            <div class="popup-header" id="battle-popup-title">13:52 フェアリーを倒した</div>
-            <div id="battle-popup-content">
-                </div>
-            <button class="popup-close-btn" onclick="closePopup('popup-battle-detail')">閉じる</button>
-        </div>
-    </div>
-
-    <div class="popup-overlay" id="popup-book" style="display: none;">
-        <div class="popup-window" style="max-width:400px;">
-            <div class="popup-header">アイテム図鑑</div>
-            <div class="book-grid" id="ui-book-grid">
-                </div>
-            <button class="popup-close-btn" onclick="closePopup('popup-book')">閉じる</button>
-        </div>
-    </div>
-
-    <div class="popup-overlay" id="popup-book-detail" style="display: none;">
-        <div class="popup-window" style="max-width:400px; max-height:90vh; overflow-y:auto;">
-            <div class="popup-header" id="book-detail-name">木の棒 (ATK:5)</div>
-            
-            <div class="book-detail-section">
-                <div class="book-detail-title">基礎性能</div>
-                <div style="display:flex; justify-content:space-between;">
-                    <span>基礎攻撃力: 5</span>
-                    <span>強化上限: 10</span>
-                </div>
-            </div>
-
-            <div class="book-detail-flex">
-                <div class="book-detail-section" style="flex:1;">
-                    <div class="book-detail-title">能力上昇値</div>
-                    <div>HP: +0 (↑0)</div>
-                    <div>STR: +0 (↑0)</div>
-                    <div>VIT: +0 (↑0)</div>
-                </div>
-                <div class="book-detail-section" style="flex:1;">
-                    <div class="book-detail-title">進化先</div>
-                    <div style="color:var(--text-red)">⮞ こん棒</div>
-                </div>
-            </div>
-
-            <div class="book-detail-section">
-                <div class="book-detail-title">入手可能ダンジョン</div>
-                <div style="color:var(--text-sub); font-size:0.75rem; line-height:1.4;">
-                    はじめの草むら / 迷いの森 / 深い洞窟 / 濃霧の古戦場 / 正義の巨塔 / 終わりの魔王城 / 勇気の峡谷
-                </div>
-            </div>
-
-            <div class="book-detail-section">
-                <div class="book-detail-title">限界突破</div>
-                <div style="font-size:0.75rem; color:#00ff66; line-height:1.4;">
-                    <div>・強化上限アップ: +100</div>
-                    <div>・[~50以上] 攻撃力ブースト: x1.3</div>
-                    <div>・[~100以上] 強化上限アップ: +1,000</div>
-                    <div>・[~150以上] 強化ブースト: x2</div>
-                </div>
-            </div>
-
-            <button class="popup-close-btn" onclick="closePopup('popup-book-detail')">戻る</button>
-        </div>
-    </div>
-
     <footer>
-        <button class="tab-btn active" onclick="switchView('dungeon')" id="tab-dungeon">
-            <span class="tab-btn-icon">🪨</span>
-            <span>DUNGEON</span>
-        </button>
-        <button class="tab-btn" onclick="switchView('log')" id="tab-log">
-            <span class="tab-btn-icon">📜</span>
-            <span>LOG</span>
-        </button>
-        <button class="tab-btn" onclick="switchView('item')" id="tab-item">
-            <span class="tab-btn-icon">💼</span>
-            <span>ITEM</span>
-        </button>
-        <button class="tab-btn" onclick="switchView('status')" id="tab-status">
-            <span class="tab-btn-icon">🏃</span>
-            <span>STATUS</span>
-        </button>
+        <button class="tab active" onclick="switchTab('dungeon')">DUNGEON</button>
+        <button class="tab" onclick="switchTab('log')">LOG</button>
+        <button class="tab" onclick="switchTab('item')">ITEM</button>
+        <button class="tab" onclick="switchTab('status')">STATUS</button>
     </footer>
 </div>
 
 <script>
-    // --- マスターデータ定義 ---
-    const DUNGEON_DATA = [
-        { id: '草むら', name: "はじめの草むら", floors: 3, duration: 30, level: 1 },
-        { id: '森', name: "迷いの森", floors: 5, duration: 60, level: 3 },
-        { id: '洞窟', name: "深い洞窟", floors: 8, duration: 180, level: 6 },
-        { id: '峡谷', name: "勇気の峡谷（瘴気濃度1）", floors: 14, duration: 300, level: 14 } // 画像ターゲット
+    /* ================= マスタデータ ================= */
+    const DUNGEONS = [
+        { id: "d1", name: "はじめの草むら", timeSec: 60, reqLv: 1, enemies: ["スライム", "コウモリ"], dropTypes: ["weapon", "armor"], dropRate: 0.5 },
+        { id: "d2", name: "迷いの森", timeSec: 180, reqLv: 3, enemies: ["ゴブリン", "フェアリー"], dropTypes: ["weapon", "armor"], dropRate: 0.7 },
+        { id: "d3", name: "深い洞窟", timeSec: 300, reqLv: 5, enemies: ["オーク", "ゴーレム"], dropTypes: ["weapon", "armor"], dropRate: 0.8 }
     ];
 
-    const BOOK_DATA = [
-        { no: 1, name: "木の棒", atk: 5, type: "打撃", desc: "強化上限10" },
-        { no: 2, name: "こん棒", atk: 2619, type: "打撃", desc: "腕力による超強化" },
-        { no: 3, name: "ショートソード", atk: 1235, type: "斬撃", desc: "機敏・幸運付与" },
-        { no: 4, name: "ロングソード", atk: 1742, type: "斬撃", desc: "力の鍛錬・耐久" }
-    ];
+    const ENEMIES = {
+        "スライム": { hp: 15, atk: 3, def: 1, exp: 2 },
+        "コウモリ": { hp: 10, atk: 5, def: 0, exp: 3 },
+        "ゴブリン": { hp: 35, atk: 12, def: 5, exp: 8 },
+        "フェアリー": { hp: 20, atk: 18, def: 2, exp: 12 },
+        "オーク":   { hp: 80, atk: 25, def: 15, exp: 25 },
+        "ゴーレム": { hp: 150, atk: 20, def: 30, exp: 35 }
+    };
 
-    const ENEMY_NAMES = ["フェアリー", "ファイアフェアリー", "ライトニングフェアリー", "ゴブリン", "オーク"];
-
-    // --- ゲーム状態管理 ---
-    let gameState = {
-        isExploring: true,
-        currentDungeon: DUNGEON_DATA[3], // 初期値：勇気の峡谷
-        startTime: Date.now(),
-        endTime: Date.now() + 300000, // あと5分（デモ用に短縮調整、本来は画像に合わせて計算可能）
-        currentFloor: 6,
-        logs: [
-            {
-                time: "13:48", title: "ファイアフェアリーを倒した",
-                details: ["ファイアフェアリーと対峙した", "たまの攻撃：クリティカル！", "ファイアフェアリーに12,401のダメージ", "ファイアフェアリーを倒した", "15の経験値を得た"]
-            },
-            {
-                time: "13:50", title: "フェアリーを倒した",
-                details: ["フェアリーと対峙した", "たまの攻撃", "フェアリーに9,394のダメージ", "フェアリーを倒した", "1の経験値を得た"]
-            },
-            {
-                time: "13:52", title: "フェアリーを倒した", // IMG_2895用データ
-                details: [
-                    "たま Lv:14 HP:317/317 ATK:12,941 DEF:1,183 SPD:15 LUK:1 EXP:961/1,050",
-                    "×",
-                    "フェアリー HP:4,524 ATK:3,549 DEF:3,549 SPD:88",
-                    "たまの攻撃",
-                    "フェアリーに9,394のダメージ",
-                    "フェアリーを倒した",
-                    "1の経験値を得た"
-                ]
-            },
-            {
-                time: "13:54", title: "ライトニングフェアリーを倒した",
-                details: ["ライトニングフェアリーと対峙した", "たまのスピードが勝っている！", "ライトニングフェアリーに11,200のダメージ", "ライトニングフェアリーを倒した", "2の経験値を得た"]
-            }
+    const ITEMS = {
+        weapon: [
+            { name: "木の棒", atk: 3, def: 0 },
+            { name: "こん棒", atk: 8, def: 0 },
+            { name: "ショートソード", atk: 15, def: 0 }
         ],
-        items: [
-            { name: "こん棒", atk: 2619, lv: 200, skills: ["腕力 Lv12", "腕力 Lv12", "腕力 Lv12"], equipped: true, rare: true },
-            { name: "ロングソード", atk: 1742, lv: 131, skills: ["耐久 Lv5", "力の鍛錬 Lv2", "守りの鍛錬 Lv2"], equipped: false, rare: true },
-            { name: "ロングソード", atk: 1599, lv: 120, skills: ["頑丈 Lv10", "機敏 Lv2", "守りの鍛錬 Lv3"], equipped: false, rare: true },
-            { name: "ショートソード", atk: 1235, lv: 93, skills: ["機敏 Lv4", "機敏 Lv3", "幸運 Lv3★MAX"], equipped: false, rare: true }
+        armor: [
+            { name: "布の服", atk: 0, def: 2 },
+            { name: "革の鎧", atk: 0, def: 7 },
+            { name: "木の盾", atk: 0, def: 12 }
         ]
     };
 
-    // --- ビュー切り替え ---
-    function switchView(viewId) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        
-        document.getElementById('view-' + viewId).classList.add('active');
-        document.getElementById('tab-' + viewId).classList.add('active');
+    /* ================= プレイヤーデータ ================= */
+    let player = {
+        name: "たま",
+        level: 1,
+        exp: 0,
+        baseHp: 20,
+        str: 5,
+        vit: 5,
+        spd: 5,
+        equipment: { weapon: null, armor: null },
+        inventory: []
+    };
+
+    let state = {
+        isExploring: false,
+        dungeonId: null,
+        startTime: 0,
+        endTime: 0,
+        logs: []
+    };
+
+    /* ================= システム処理 ================= */
+    function init() {
+        loadData();
+        renderDungeonList();
+        setInterval(gameLoop, 1000);
+        updateUI();
     }
 
-    // --- ポップアップ操作 ---
-    function openPopup(id) { document.getElementById(id).style.display = 'flex'; }
-    function closePopup(id) { document.getElementById(id).style.display = 'none'; }
-
-    function openBattlePopup(logIndex) {
-        const log = gameState.logs[logIndex];
-        document.getElementById('battle-popup-title').innerText = `${log.time} ${log.title}`;
-        
-        const contentBox = document.getElementById('battle-popup-content');
-        contentBox.innerHTML = '';
-        
-        log.details.forEach(line => {
-            const node = document.createElement('div');
-            node.className = 'battle-log-node';
-            if(line.includes("攻撃") || line.includes("ダメージ")) node.classList.add('attack');
-            if(line.includes("倒した") || line.includes("経験値")) node.classList.add('victory');
-            node.innerText = line;
-            contentBox.appendChild(node);
-        });
-        openPopup('popup-battle-detail');
+    // ステータス計算
+    function getMaxHp() { return player.baseHp + (player.vit * 2); }
+    function getAtk() { 
+        let eqAtk = player.equipment.weapon ? player.equipment.weapon.atk : 0;
+        return player.str + eqAtk; 
     }
-
-    function openBookPopup() {
-        const grid = document.getElementById('ui-book-grid');
-        grid.innerHTML = '';
-        BOOK_DATA.forEach(b => {
-            const card = document.createElement('div');
-            card.className = 'book-card';
-            card.onclick = () => openBookDetail(b.name);
-            card.innerHTML = `
-                <div style="font-size:1.3rem;">🗡️</div>
-                <div class="book-card-info">
-                    <div class="book-card-name">${b.name}</div>
-                    <div style="color:var(--text-sub); font-size:0.7rem;">Weapon No.${b.no}</div>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-        openPopup('popup-book');
+    function getDef() { 
+        let eqDef = player.equipment.armor ? player.equipment.armor.def : 0;
+        return Math.floor(player.vit / 2) + eqDef; 
     }
+    function getExpNext() { return player.level * 10 + Math.floor(Math.pow(player.level, 1.5) * 5); }
 
-    function openBookDetail(name) {
-        const item = BOOK_DATA.find(b => b.name === name);
-        document.getElementById('book-detail-name').innerText = `${item.name} (ATK:${item.atk})`;
-        openPopup('popup-book-detail');
-    }
-
-    // --- メインループ・時間更新 ---
-    function initEngine() {
-        // ダンジョン選択リストの構築
-        const selectContainer = document.getElementById('dungeon-selection-list');
-        selectContainer.innerHTML = '';
-        DUNGEON_DATA.forEach(d => {
-            const div = document.createElement('div');
-            div.className = 'dungeon-select-item';
-            div.onclick = () => startExploration(d);
-            div.innerHTML = `
-                <div>
-                    <div style="font-weight:bold;">${d.name}</div>
-                    <div style="font-size:0.75rem; color:var(--text-sub);">必要時間: ${d.duration}秒 / 推奨Lv: ${d.level}</div>
-                </div>
-                <div style="color:var(--accent-purple); font-weight:bold;">⮞ 派遣</div>
-            `;
-            selectContainer.appendChild(div);
-        });
-
-        setInterval(tick, 1000);
-        renderLogs();
-        renderItems();
-    }
-
-    function startExploration(dungeon) {
-        gameState.currentDungeon = dungeon;
-        gameState.isExploring = true;
-        gameState.startTime = Date.now();
-        gameState.endTime = Date.now() + (dungeon.duration * 1000);
-        gameState.currentFloor = 1;
-        gameState.logs = [{ time: "開始", title: `${dungeon.name} へ足を踏み入れた`, details: ["探索を開始した。"] }];
-        
-        document.getElementById('dungeon-select-ui').style.display = 'none';
-        document.getElementById('dungeon-active-ui').style.display = 'block';
-        renderLogs();
-    }
-
-    function abortExploration() {
-        gameState.isExploring = false;
-        document.getElementById('dungeon-active-ui').style.display = 'none';
-        document.getElementById('dungeon-select-ui').style.display = 'block';
-    }
-
-    function tick() {
+    // ゲームループ（1秒ごとの処理）
+    function gameLoop() {
         const now = Date.now();
-        
-        // ヘッダー時計更新
-        const timeStr = new Date().toTimeString().split(' ')[0].substring(0, 5);
-        document.getElementById('global-clock').innerText = timeStr;
+        document.getElementById('ui-time').innerText = new Date().toTimeString().slice(0,5);
 
-        if (gameState.isExploring) {
-            const total = gameState.endTime - gameState.startTime;
-            const elapsed = now - gameState.startTime;
-            const remain = Math.max(0, gameState.endTime - now);
+        if (state.isExploring) {
+            const dungeon = DUNGEONS.find(d => d.id === state.dungeonId);
+            const totalMs = dungeon.timeSec * 1000;
+            const elapsed = now - state.startTime;
+            const remain = Math.max(0, state.endTime - now);
 
-            // 残り時間表示
-            const remainMin = Math.floor(remain / 60000);
-            const remainSec = Math.floor((remain % 60000) / 1000);
-            document.getElementById('global-remain').innerText = `(あと${remainMin}分${remainSec}秒)`;
+            // UI更新
+            const p = Math.min(100, (elapsed / totalMs) * 100);
+            document.getElementById('ui-progress').style.width = p + '%';
+            
+            const rSec = Math.floor(remain / 1000);
+            const m = String(Math.floor(rSec / 60)).padStart(2, '0');
+            const s = String(rSec % 60).padStart(2, '0');
+            document.getElementById('ui-time-remain').innerText = `${m}:${s}`;
 
-            // 帰還時刻
-            document.getElementById('ui-return-time').innerText = new Date(gameState.endTime).toTimeString().substring(0, 5);
-
-            // プログレスバー
-            const percent = Math.min(100, (elapsed / total) * 100);
-            document.getElementById('ui-progress-bar').style.width = percent + '%';
-
-            // 階層の擬似進捗
-            const targetFloor = Math.min(gameState.currentDungeon.floors, Math.floor((percent / 100) * gameState.currentDungeon.floors) + 1);
-            if (targetFloor !== gameState.currentFloor) {
-                gameState.currentFloor = targetFloor;
-                document.getElementById('ui-progress-floor').innerText = `${gameState.currentFloor}階を探索中`;
-                
-                // 新しいログのランダム自動生成
-                generateRandomLog();
+            // ランダムエンカウント (5秒に1回程度の確率)
+            if (remain > 2000 && Math.random() < 0.2) {
+                processEncounter(dungeon);
             }
 
-            if (now >= gameState.endTime) {
-                gameState.isExploring = false;
-                alert("ダンジョンから帰還しました！");
-                abortExploration();
+            // 探索完了
+            if (now >= state.endTime) {
+                finishExploration(dungeon);
             }
-        } else {
-            document.getElementById('global-remain').innerText = "(街に滞在中)";
         }
     }
 
-    function generateRandomLog() {
-        const timeStr = new Date().toTimeString().substring(0, 5);
-        const enemy = ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)];
-        const newLog = {
-            time: timeStr,
-            title: `${enemy}を倒した`,
-            details: [
-                `たま Lv:14 HP:317/317 ATK:12,941 DEF:1,183`,
-                `×`,
-                `${enemy} と遭遇した！`,
-                `たまの攻撃、裂波が炸裂する！`,
-                `${enemy}に計9,840のダメージを与えた`,
-                `${enemy}を撃破した。`,
-                `1の経験値、および戦利品を入手。`
-            ]
-        };
-        gameState.logs.unshift(newLog); // 最新を上に
+    // 戦闘処理
+    function processEncounter(dungeon) {
+        const enemyName = dungeon.enemies[Math.floor(Math.random() * dungeon.enemies.length)];
+        const enemy = ENEMIES[enemyName];
+        
+        // 簡易戦闘計算
+        const pAtk = getAtk();
+        const pDef = getDef();
+        
+        let dmgToEnemy = Math.max(1, pAtk - enemy.def);
+        let dmgToPlayer = Math.max(0, enemy.atk - pDef); // 現状HP減る概念はスキップ（放置優先のため）
+
+        // 倒すまでのターン数を概算して勝敗決定
+        let turns = Math.ceil(enemy.hp / dmgToEnemy);
+        
+        addLog(`⚔️ ${enemyName}と遭遇！ ${dmgToEnemy * turns}のダメージを与えて撃破した！`, 'battle');
+        gainExp(enemy.exp);
+    }
+
+    // 経験値とレベルアップ
+    function gainExp(amount) {
+        player.exp += amount;
+        addLog(`✨ ${amount} の経験値を獲得。`, 'system');
+        
+        while (player.exp >= getExpNext()) {
+            player.exp -= getExpNext();
+            player.level++;
+            player.baseHp += 5;
+            player.str += Math.floor(Math.random() * 3) + 1;
+            player.vit += Math.floor(Math.random() * 2) + 1;
+            player.spd += Math.floor(Math.random() * 2) + 1;
+            addLog(`🆙 レベルが ${player.level} に上がった！ステータスが上昇！`, 'loot');
+        }
+        saveData();
+    }
+
+    // アイテムドロップ
+    function rollLoot(dungeon) {
+        if (Math.random() < dungeon.dropRate) {
+            const type = dungeon.dropTypes[Math.floor(Math.random() * dungeon.dropTypes.length)];
+            const pool = ITEMS[type];
+            // ダンジョン難易度に応じて良いアイテムが出やすくする等の拡張が可能
+            const itemBase = pool[Math.floor(Math.random() * Math.min(pool.length, dungeon.reqLv))];
+            
+            // 固有のアイテムデータを生成（将来的には＋値などもここで付与）
+            const dropItem = {
+                id: Date.now() + Math.floor(Math.random()*1000),
+                type: type,
+                name: itemBase.name,
+                atk: itemBase.atk,
+                def: itemBase.def
+            };
+            
+            player.inventory.push(dropItem);
+            addLog(`🎁 宝箱から「${dropItem.name}」を見つけた！`, 'loot');
+        }
+    }
+
+    // 探索開始・終了
+    function startExploration(dungeonId) {
+        const d = DUNGEONS.find(x => x.id === dungeonId);
+        if (player.level < d.reqLv) {
+            alert(`レベルが足りません。推奨Lv: ${d.reqLv}`);
+            return;
+        }
+        
+        state.isExploring = true;
+        state.dungeonId = d.id;
+        state.startTime = Date.now();
+        state.endTime = state.startTime + (d.timeSec * 1000);
+        
+        document.getElementById('ui-current-dungeon-name').innerText = `${d.name} を探索中`;
+        addLog(`🚶 ${d.name} へ出発した。帰還まで ${d.timeSec} 秒...`, 'system');
+        
+        saveData();
+        updateUI();
+    }
+
+    function abortExploration() {
+        state.isExploring = false;
+        addLog(`🏃 探索を途中で切り上げて帰還した。`, 'system');
+        saveData();
+        updateUI();
+    }
+
+    function finishExploration(dungeon) {
+        state.isExploring = false;
+        addLog(`🏁 ${dungeon.name} の探索を完了した！`, 'system');
+        rollLoot(dungeon);
+        saveData();
+        updateUI();
+    }
+
+    // 装備処理
+    function equipItem(itemId) {
+        const item = player.inventory.find(i => i.id === itemId);
+        if (!item) return;
+
+        // 現在の装備を外してインベントリに戻す処理は省略（今回は単純上書き）
+        if (item.type === 'weapon') player.equipment.weapon = item;
+        if (item.type === 'armor') player.equipment.armor = item;
+        
+        saveData();
+        updateUI();
+        switchTab('status');
+    }
+
+    // ログ機能
+    function addLog(text, type = 'system') {
+        const time = new Date().toTimeString().slice(0,5);
+        state.logs.unshift({ time, text, type });
+        if (state.logs.length > 50) state.logs.pop(); // ログ上限
         renderLogs();
     }
 
-    // --- レンダリング系 ---
-    function renderLogs() {
-        const list = document.getElementById('ui-log-list');
+    // セーブ・ロード
+    function saveData() {
+        localStorage.setItem('whipper_save_player', JSON.stringify(player));
+        localStorage.setItem('whipper_save_state', JSON.stringify(state));
+    }
+    function loadData() {
+        const p = localStorage.getItem('whipper_save_player');
+        const s = localStorage.getItem('whipper_save_state');
+        if (p) player = JSON.parse(p);
+        if (s) state = JSON.parse(s);
+    }
+    function resetData() {
+        if(confirm("データを全て消去してLv1からやり直しますか？")) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+
+    /* ================= 描画・UI制御 ================= */
+    function switchTab(tabId) {
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+        document.getElementById(`view-${tabId}`).classList.add('active');
+        event.currentTarget.classList.add('active');
+        updateUI();
+    }
+
+    function updateUI() {
+        // ダンジョン画面切り替え
+        document.getElementById('ui-idle-state').style.display = state.isExploring ? 'none' : 'block';
+        document.getElementById('ui-explore-state').style.display = state.isExploring ? 'block' : 'none';
+        
+        // ステータス画面
+        document.getElementById('st-lv').innerText = player.level;
+        document.getElementById('st-exp').innerText = `${player.exp} / ${getExpNext()}`;
+        document.getElementById('st-hp').innerText = `${getMaxHp()} / ${getMaxHp()}`;
+        document.getElementById('st-atk').innerText = getAtk();
+        document.getElementById('st-def').innerText = getDef();
+        document.getElementById('st-str').innerText = player.str;
+        document.getElementById('st-vit').innerText = player.vit;
+        document.getElementById('st-spd').innerText = player.spd;
+        
+        document.getElementById('eq-weapon').innerText = player.equipment.weapon ? `${player.equipment.weapon.name} (ATK+${player.equipment.weapon.atk})` : 'なし';
+        document.getElementById('eq-armor').innerText = player.equipment.armor ? `${player.equipment.armor.name} (DEF+${player.equipment.armor.def})` : 'なし';
+
+        renderLogs();
+        renderInventory();
+    }
+
+    function renderDungeonList() {
+        const list = document.getElementById('dungeon-list');
         list.innerHTML = '';
-        gameState.logs.forEach((log, index) => {
-            const item = document.createElement('div');
-            item.className = 'log-item';
-            item.onclick = () => openBattlePopup(index);
-            item.innerHTML = `
-                <div class="log-item-left">
-                    <div class="log-item-icon">⚔️</div>
-                    <div class="log-item-details">
-                        <div class="log-item-title">${log.time} &nbsp; ${log.title}</div>
-                        <div class="log-item-sub">Lv:14 HP:317/317 ATK:12,941 DEF:1,183</div>
-                    </div>
-                </div>
-                <div class="log-item-arrow">⮞</div>
-            `;
-            list.appendChild(item);
-        });
-    }
-
-    function renderItems() {
-        const container = document.getElementById('ui-item-list');
-        container.innerHTML = '';
-        gameState.items.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'item-card';
-            
-            let skillsHtml = item.skills.map(s => `<div>${s}</div>`).join('');
-            
-            card.innerHTML = `
-                <div class="item-card-left">
-                    <div class="item-img-box">
-                        🗡️
-                        ${item.equipped ? '<div class="item-equip-badge">E</div>' : ''}
-                        <div class="item-level-badge">~${item.lv}</div>
-                    </div>
+        DUNGEONS.forEach(d => {
+            list.innerHTML += `
+                <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <div class="item-name-line ${item.rare ? 'rare' : ''}">${item.name} (ATK:${item.atk.toLocaleString()})</div>
-                        <div class="item-skills">${skillsHtml}</div>
+                        <div style="font-weight:bold;">${d.name}</div>
+                        <div style="font-size:0.8rem; color:var(--sub);">推奨Lv: ${d.reqLv} / 所要時間: ${d.timeSec}秒</div>
                     </div>
+                    <button class="btn primary" style="width:auto;" onclick="startExploration('${d.id}')" ${player.level < d.reqLv ? 'disabled' : ''}>出発</button>
                 </div>
-                <div style="color:var(--text-sub); font-size:1.2rem; cursor:pointer;">⋮</div>
             `;
-            container.appendChild(card);
         });
     }
 
-    window.onload = initEngine;
+    function renderLogs() {
+        let html = '';
+        state.logs.forEach(log => {
+            html += `<div class="log-item ${log.type}">[${log.time}] ${log.text}</div>`;
+        });
+        document.getElementById('ui-full-logs').innerHTML = html;
+        document.getElementById('ui-explore-logs').innerHTML = state.logs.slice(0,3).map(log => `<div class="log-item ${log.type}">[${log.time}] ${log.text}</div>`).join('');
+    }
+
+    function renderInventory() {
+        const inv = document.getElementById('ui-inventory');
+        inv.innerHTML = '';
+        if (player.inventory.length === 0) {
+            inv.innerHTML = '<div style="color:var(--sub);text-align:center;margin-top:20px;">アイテムがありません</div>';
+            return;
+        }
+        player.inventory.forEach(item => {
+            let statText = item.type === 'weapon' ? `ATK: ${item.atk}` : `DEF: ${item.def}`;
+            let icon = item.type === 'weapon' ? '🗡️' : '🛡️';
+            inv.innerHTML += `
+                <div class="list-item">
+                    <div>
+                        <div style="font-weight:bold;">${icon} ${item.name}</div>
+                        <div style="font-size:0.8rem; color:var(--sub);">${statText}</div>
+                    </div>
+                    <button class="equip-btn" onclick="equipItem(${item.id})">装備</button>
+                </div>
+            `;
+        });
+    }
+
+    // 起動
+    init();
 </script>
 </body>
 </html>
