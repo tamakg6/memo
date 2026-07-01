@@ -1,122 +1,1348 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>RPG HACK & SLASH - EXPANDED</title>
-    <style>
-        :root { --bg: #121212; --card: #1e1e1e; --accent: #bb86fc; --text: #eee; }
-        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding-bottom: 70px; }
-        .tab-content { display: none; padding: 15px; }
-        .tab-content.active { display: block; }
-        /* スクロール対応 */
-        #dungeon-container { height: 70vh; overflow-y: auto; }
-        .card { background: var(--card); border: 1px solid #444; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
-        .btn { background: #333; color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; cursor: pointer; }
-        .btn-lock { background: #222; color: #555; cursor: not-allowed; }
-        .btn-active { background: #6200ea; font-weight: bold; }
-        #nav { position: fixed; bottom: 0; width: 100%; display: flex; background: #000; border-top: 1px solid #444; }
-        #nav button { flex: 1; padding: 15px; background: none; border: none; color: #888; font-weight: bold; }
-        #nav button.active { color: var(--accent); }
-    </style>
+<meta charset="UTF-8">
+<title>Whipper風 放置RPG v2</title>
+<style>
+  :root {
+    --bg: #14151a;
+    --panel: #1e2027;
+    --panel2: #262833;
+    --panel3: #2e313d;
+    --border: #34363f;
+    --text: #e8e8ec;
+    --text-dim: #9a9ba5;
+    --accent: #7c6df0;
+    --accent-dim: #4a3fa0;
+    --danger: #e0556a;
+    --warn: #d8a73f;
+    --safe: #4caf7c;
+    --gold: #d8b34a;
+    --white: #cfd2da;
+    --blue: #5b8fd8;
+    --yellow: #d8c23f;
+    --red: #d85f5f;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Hiragino Sans", "Yu Gothic", sans-serif;
+    font-size: 14px;
+    padding-bottom: 70px;
+  }
+  .topbar {
+    position: sticky;
+    top: 0;
+    height: 48px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    z-index: 100;
+  }
+  .topbar-title {
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .nav-grid {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    display: flex;
+    z-index: 100;
+  }
+  .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    gap: 2px;
+  }
+  .tab-btn.active {
+    color: var(--accent);
+    font-weight: bold;
+  }
+  .tab-btn i {
+    font-size: 18px;
+  }
+  .screen {
+    padding: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .hidden { display: none !important; }
+  
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.2s;
+  }
+  .btn:hover { background: var(--accent-dim); }
+  .btn:disabled { background: var(--border); color: var(--text-dim); cursor: not-allowed; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 4px; }
+  .btn-danger { background: var(--danger); }
+  .btn-danger:hover { background: #b83d4f; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-outline:hover { background: var(--panel2); }
+  
+  .section-title {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin: 16px 0 8px 0;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .section-title:first-child { margin-top: 0; }
+  
+  /* メイン(Status)画面 */
+  .status-header-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .sh-row1 { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .sh-name { font-size: 18px; font-weight: bold; }
+  .sh-lv { font-size: 14px; color: var(--accent); font-weight: bold; }
+  .sh-hp-bar-bg { height: 8px; background: #000; border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
+  .sh-hp-bar-fill { height: 100%; background: var(--safe); width: 100%; transition: width 0.2s; }
+  .sh-hp-txt { font-size: 12px; text-align: right; color: var(--text-dim); }
+  
+  .equip-slot-container { display: flex; flex-direction: column; gap: 12px; }
+  .equip-slot {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .eq-left { display: flex; align-items: center; gap: 12px; }
+  .eq-icon { width: 36px; height: 36px; background: var(--panel2); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--text-dim); }
+  .eq-info { display: flex; flex-direction: column; gap: 2px; }
+  .eq-slotname { font-size: 11px; color: var(--text-dim); }
+  .eq-itemname { font-size: 14px; font-weight: bold; }
+  .eq-itemabilities { font-size: 11px; color: var(--safe); }
+  
+  /* 倉庫画面 */
+  .filter-row { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
+  .filter-chip { background: var(--panel); border: 1px solid var(--border); padding: 6px 12px; border-radius: 16px; font-size: 12px; color: var(--text-dim); cursor: pointer; white-space: nowrap; }
+  .filter-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  
+  .item-list { display: flex; flex-direction: column; gap: 8px; }
+  .item-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+  .item-card.equipped { border-left: 4px solid var(--safe); }
+  .item-card.selected { border-color: var(--accent); background: var(--panel2); }
+  .ic-left { display: flex; flex-direction: column; gap: 2px; }
+  .ic-name { font-weight: bold; font-size: 14px; }
+  .ic-sub { font-size: 11px; color: var(--text-dim); }
+  .ic-abilities { font-size: 11px; color: var(--safe); margin-top: 2px; }
+  .ic-right { font-size: 12px; color: var(--text-dim); text-align: right; }
+  
+  .rarity-white { color: var(--white); }
+  .rarity-blue { color: var(--blue); font-weight: bold; }
+  .rarity-yellow { color: var(--yellow); font-weight: bold; }
+  .rarity-red { color: var(--red); font-weight: bold; }
+  
+  /* 素材グリッド */
+  .material-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+  .mat-card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 8px; text-align: center; }
+  .mat-name { font-size: 12px; margin-bottom: 4px; color: var(--text-dim); }
+  .mat-count { font-size: 16px; font-weight: bold; color: var(--gold); }
+  
+  /* 詳細モーダル風パネル */
+  .detail-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+  }
+  .dp-title-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .dp-title { font-size: 16px; font-weight: bold; }
+  .dp-cat { font-size: 11px; color: var(--text-dim); background: var(--panel2); padding: 2px 6px; border-radius: 4px; }
+  
+  .param-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 13px; }
+  .param-table th { text-align: left; color: var(--text-dim); padding: 4px 8px; font-weight: normal; font-size: 11px; }
+  .param-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  .param-table tr:last-child td { border-bottom: none; }
+  .diff-pos { color: var(--safe); font-weight: bold; }
+  .diff-neg { color: var(--danger); font-weight: bold; }
+  
+  .dp-actions { display: flex; gap: 8px; margin-top: 12px; }
+  
+  /* 霧画面 */
+  .mist-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
+  .mist-val { font-size: 36px; font-weight: bold; color: #a18fff; margin: 12px 0; font-family: monospace; }
+  .mist-desc { font-size: 12px; color: var(--text-dim); text-align: left; background: var(--panel2); padding: 12px; border-radius: 6px; line-height: 1.5; }
+  .mist-ctrls { display: flex; justify-content: center; gap: 16px; margin-bottom: 16px; }
+  
+  /* ダンジョン画面 */
+  .dg-list { display: flex; flex-direction: column; gap: 12px; }
+  .dg-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; justify-content: space-between; align-items: center; }
+  .dg-info { display: flex; flex-direction: column; gap: 4px; }
+  .dg-name { font-size: 16px; font-weight: bold; }
+  .dg-floors { font-size: 12px; color: var(--text-dim); }
+  
+  /* 探索・ログ画面 */
+  .log-header { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+  .log-area { background: #0b0c10; border: 1px solid var(--border); border-radius: 8px; padding: 12px; height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; line-height: 1.6; display: flex; flex-direction: column; gap: 4px; }
+  .l-row { color: var(--text-dim); }
+  .l-turn { color: var(--accent); margin-right: 6px; }
+  .l-text { color: var(--text); }
+  .l-hit-p { color: var(--safe); }
+  .l-hit-m { color: var(--danger); }
+  .l-kill { color: var(--yellow); font-weight: bold; }
+  .l-get { color: var(--gold); font-weight: bold; }
+  .l-sys { color: #8fa1ff; }
+  .l-ev { color: #ff8fdf; font-weight: bold; }
+  
+  @keyframes flash-green {
+    0% { background: rgba(76,175,124,0.4); }
+    100% { background: transparent; }
+  }
+  .flash-evolve { animation: flash-green 1s ease-out; }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-<main>
-    <section id="tab-dungeon" class="tab-content active">
-        <h3>DUNGEON</h3>
-        <div id="dungeon-container">
-            <div id="dungeon-list"></div>
-        </div>
-    </section>
-    <section id="tab-log" class="tab-content">
-        <h3>LOG</h3>
-        <div id="log-list"></div>
-    </section>
-    <section id="tab-item" class="tab-content">
-        <h3>ITEM</h3>
-        <div id="inventory-list"></div>
-    </section>
-    <section id="tab-status" class="tab-content">
-        <h3>STATUS</h3>
-        <div id="status-display"></div>
-    </section>
-</main>
+<div class="topbar">
+  <div class="topbar-title">WHIPPER BROWSER</div>
+  <div class="topbar-right">
+    <button class="btn btn-sm btn-outline" id="btnBook"><i class="fa-solid fa-book"></i> 図鑑</button>
+  </div>
+</div>
 
-<nav id="nav">
-    <button onclick="showTab('tab-dungeon', this)" class="active">DUNGEON</button>
-    <button onclick="showTab('tab-log', this)">LOG</button>
-    <button onclick="showTab('tab-item', this)">ITEM</button>
-    <button onclick="showTab('tab-status', this)">STATUS</button>
-</nav>
+<div id="screen-status" class="screen">
+  <div class="status-header-card">
+    <div class="sh-row1">
+      <div class="sh-name">冒険者</div>
+      <div class="sh-lv" id="lblTownLv">Lv 1</div>
+    </div>
+    <div class="sh-hp-bar-bg"><div class="sh-hp-bar-fill" id="pbTownHp"></div></div>
+    <div class="sh-hp-txt" id="lblTownHp">HP 30 / 30</div>
+  </div>
+  
+  <div class="section-title">現在の装備品</div>
+  <div class="equip-slot-container">
+    <div class="equip-slot" data-cat="weapon">
+      <div class="eq-left">
+        <div class="eq-icon"><i class="fa-solid fa-gavel"></i></div>
+        <div class="eq-info">
+          <div class="eq-slotname">WEAPON</div>
+          <div class="eq-itemname" id="eqName-weapon">素手</div>
+          <div class="eq-itemabilities" id="eqAbil-weapon"></div>
+        </div>
+      </div>
+      <button class="btn btn-sm btn-outline btn-unequip" data-cat="weapon">はずす</button>
+    </div>
+    <div class="equip-slot" data-cat="shield">
+      <div class="eq-left">
+        <div class="eq-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="eq-info">
+          <div class="eq-slotname">SHIELD</div>
+          <div class="eq-itemname" id="eqName-shield">なし</div>
+          <div class="eq-itemabilities" id="eqAbil-shield"></div>
+        </div>
+      </div>
+      <button class="btn btn-sm btn-outline btn-unequip" data-cat="shield">はずす</button>
+    </div>
+    <div class="equip-slot" data-cat="ring">
+      <div class="eq-left">
+        <div class="eq-icon"><i class="fa-solid fa-ring"></i></div>
+        <div class="eq-info">
+          <div class="eq-slotname">RING</div>
+          <div class="eq-itemname" id="eqName-ring">なし</div>
+          <div class="eq-itemabilities" id="eqAbil-ring"></div>
+        </div>
+      </div>
+      <button class="btn btn-sm btn-outline btn-unequip" data-cat="ring">はずす</button>
+    </div>
+  </div>
+  
+  <div class="section-title" style="margin-top:20px;">街でのベース能力 (装備Lv1合計)</div>
+  <div class="status-header-card" style="background:var(--panel2); padding:12px;">
+    <table class="param-table" style="margin-bottom:0;">
+      <tr><td>HP</td><td id="bStat-hp" style="text-align:right; font-weight:bold;">30</td></tr>
+      <tr><td>STR</td><td id="bStat-str" style="text-align:right; font-weight:bold;">10</td></tr>
+      <tr><td>VIT</td><td id="bStat-vit" style="text-align:right; font-weight:bold;">10</td></tr>
+      <tr><td>SPD</td><td id="bStat-spd" style="text-align:right; font-weight:bold;">1</td></tr>
+      <tr><td>LUK</td><td id="bStat-luk" style="text-align:right; font-weight:bold;">1</td></tr>
+    </table>
+  </div>
+</div>
+
+<div id="screen-item" class="screen hidden">
+  <div class="filter-row" id="itemFilterRow">
+    <div class="filter-chip active" data-filter="all">すべて</div>
+    <div class="filter-chip" data-filter="weapon">武器</div>
+    <div class="filter-chip" data-filter="shield">盾</div>
+    <div class="filter-chip" data-filter="ring">指輪</div>
+  </div>
+  <div class="item-list" id="lstInventory"></div>
+  
+  <div id="pnlItemDetail" class="detail-panel hidden">
+    </div>
+  
+  <div class="section-title" style="margin-top:24px;">所持している素材・薬品</div>
+  <div class="material-grid" id="gridMaterials"></div>
+</div>
+
+<div id="screen-mist" class="screen hidden">
+  <div class="mist-card">
+    <div class="section-title" style="margin:0;">現在の瘴気濃度</div>
+    <div class="mist-val" id="lblMistValue">0</div>
+    <div class="mist-ctrls">
+      <button class="btn btn-outline" id="btnMistDown" style="width:60px;"><i class="fa-solid fa-minus"></i></button>
+      <button class="btn" id="btnMistUp" style="width:60px;"><i class="fa-solid fa-plus"></i></button>
+    </div>
+    <div class="mist-desc">
+      <strong>【瘴気濃度の効果】</strong><br>
+      濃度を上げるとダンジョン内の魔物が著しく強化（HP・ATK・DEF・速度が上昇）されますが、帰還時に持ち帰る装備品に高レベルの<strong>「侵蝕度」</strong>が付与されやすくなります。<br>
+      侵蝕された装備は基礎ステータスが数倍〜数十倍に跳ね上がります。
+    </div>
+  </div>
+</div>
+
+<div id="screen-dungeon" class="screen hidden">
+  <div class="dg-list" id="lstDungeons"></div>
+</div>
+
+<div id="screen-log" class="screen hidden">
+  <div class="log-header">
+    <div>
+      <span id="lblLogDungeonName" style="font-weight:bold; font-size:15px;">-</span>
+      <span id="lblLogFloor" style="margin-left:8px; color:var(--accent); font-weight:bold;">1F</span>
+    </div>
+    <div id="lblLogPlayerState" style="font-size:12px; color:var(--text-dim);">街に待機中</div>
+  </div>
+  
+  <div class="status-header-card" style="padding:10px 14px; margin-bottom:12px; background:var(--panel2);">
+    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+      <span id="lblLogPName" style="font-weight:bold;">冒険者 (Lv.1)</span>
+      <span id="lblLogPHp">HP 30 / 30</span>
+    </div>
+    <div class="sh-hp-bar-bg" style="height:6px;"><div class="sh-hp-bar-fill" id="pbLogPHp" style="width:100%;"></div></div>
+    <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-dim); margin-top:2px;" id="lblLogPSubStats">
+      <span>ATK: - / DEF: -</span><span>SPD: - / LUK: -</span>
+    </div>
+  </div>
+
+  <div class="log-area" id="boxLog"></div>
+  
+  <div style="margin-top:12px; display:flex; gap:10px;">
+    <button class="btn" id="btnNextStep" style="flex:1;"><i class="fa-solid fa-shoe-prints"></i> 1歩進む</button>
+    <button class="btn btn-outline btn-danger" id="btnRetreat" style="flex:1;" disabled><i class="fa-solid fa-flag"></i> 街へ撤退</button>
+  </div>
+</div>
+
+<div id="mdlBook" class="screen hidden" style="position:fixed; top:48px; bottom:56px; left:0; right:0; background:var(--bg); z-index:200; overflow-y:auto; padding:16px;">
+  <div style="display:flex; justify-content:between; align-items:center; margin-bottom:16px;">
+    <div class="section-title" style="margin:0;">アイテム解析図鑑</div>
+    <button class="btn btn-sm btn-outline" id="btnCloseBook" style="margin-left:auto;">閉じる</button>
+  </div>
+  <div class="filter-row" id="bookFilterRow">
+    <div class="filter-chip active" data-filter="weapon">武器</div>
+    <div class="filter-chip" data-filter="shield">盾</div>
+    <div class="filter-chip" data-filter="ring">指輪</div>
+  </div>
+  <div class="item-list" id="lstBook"></div>
+</div>
+
 
 <script>
-    // ダンジョンリスト（ここを増やすだけでゲームが拡張されます）
-    const DUNGEONS = [
-        { id: 0, name: "はじまりの草むら", difficulty: 1 },
-        { id: 1, name: "静寂の森", difficulty: 2 },
-        { id: 2, name: "薄暗い洞窟", difficulty: 3 },
-        { id: 3, name: "猛毒の沼地", difficulty: 4 },
-        { id: 4, name: "灼熱の火山", difficulty: 5 },
-        { id: 5, name: "古びた城跡", difficulty: 6 },
-        { id: 6, name: "氷結の雪山", difficulty: 7 },
-        { id: 7, name: "魔王城・入り口", difficulty: 8 },
-        { id: 8, name: "魔王城・深部", difficulty: 9 },
-        { id: 9, name: "奈落の底", difficulty: 10 }
-    ];
+// ===================== マスターデータ定義 =====================
+const MASTER_WEAPONS = {
+  'w_000': { name: '木の棒', hp1: 5, str1: 10, vit1: 0, spd1: 0, luk1: 0, hpUp: 0, strUp: 0, vitUp: 0, type: '打撃', target: 's_001' },
+  'w_001': { name: '└こん棒', hp1: 15, str1: 15, vit1: 0, spd1: 0, luk1: 0, hpUp: 0, strUp: 0, vitUp: 0, type: '打撃', target: 's_001' },
+  'w_002': { name: ' └木の剣', hp1: 30, str1: 55, vit1: 0, spd1: 0, luk1: 0, hpUp: 0, strUp: 1, vitUp: 0, type: '打撃', target: 's_001' },
+  'w_003': { name: 'ショートソード', hp1: 20, str1: 15, vit1: 0, spd1: 3, luk1: 0, hpUp: 0, strUp: 0, vitUp: 0, type: '斬撃', target: 's_002' },
+  'w_004': { name: '└ロングソード', hp1: 30, str1: 20, vit1: 0, spd1: 5, luk1: 0, hpUp: 0, strUp: 1, vitUp: 0, type: '斬撃', target: 's_002' },
+  'w_005': { name: 'インパルス', hp1: 770, str1: 128, vit1: 60, spd1: 120, luk1: 30, hpUp: 10, strUp: 15, vitUp: 13, type: '刺突', target: null }
+};
 
-    let state = {
-        inventory: [], logs: [], 
-        progress: 0, // 解放されているダンジョンのID
-        analysisLv: {},
-        analysisTarget: null
-    };
+const MASTER_SHIELDS = {
+  's_000': { name: 'なべのふた', hp1: 3, str1: 10, vit1: 0, spd1: 0, luk1: 0, hpUp: 0, strUp: 0, vitUp: 0, type: 'HP' },
+  's_001': { name: '└高いなべのふた', hp1: 10, str1: 10, vit1: 0, spd1: 0, luk1: 0, hpUp: 0, strUp: 0, vitUp: 0, type: 'HP' },
+  's_002': { name: '木の盾', hp1: 15, str1: 35, vit1: 0, spd1: 0, luk1: 5, hpUp: 0, strUp: 0, vitUp: 0, type: 'VIT' },
+  's_003': { name: '└堅木の盾', hp1: 40, str1: 40, vit1: 20, spd1: 0, luk1: 0, hpUp: 8, strUp: 0, vitUp: 1, type: 'VIT' },
+  's_004': { name: 'タワーシールド', hp1: 80, str1: 30, vit1: 40, spd1: 0, luk1: 5, hpUp: 0, strUp: 0, vitUp: 1, type: 'VIT' }
+};
 
-    function showTab(id, btn) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.querySelectorAll('#nav button').forEach(el => el.classList.remove('active'));
-        btn.classList.add('active');
+const MASTER_RINGS = {
+  'r_000': { name: '銅の指輪', hp1: 5, str1: 0, vit1: 0, spd1: 0, luk1: 0, hpUp: 0, strUp: 0, vitUp: 0, type: 'VIT', abils: ['極意：打撃', '極意：打撃'] },
+  'r_001': { name: '銀の指輪', hp1: 0, str1: 5, vit1: 0, spd1: 0, luk1: 0, hpUp: 0, strUp: 0, vitUp: 0, type: 'VIT', abils: ['極意：投射', '極意：投射'] },
+  'r_002': { name: '金の指輪', hp1: 0, str1: 0, vit1: 5, spd1: 0, luk1: 0, hpUp: 0, strUp: 0, vitUp: 0, type: 'HP', abils: ['スキル：不屈', '極意：打撃'] },
+  'r_003': { name: 'プラチナリング', hp1: 20, str1: 0, vit1: 5, spd1: 0, luk1: 0, hpUp: 0, strUp: 0, vitUp: 0, type: 'SPD', abils: ['ブースト：SPD', 'スキル：六感'] }
+};
+
+const MASTER_DUNGEONS = [
+  { id: 'd_001', name: 'はじまりの地', maxFloors: 5, enemies: ['スライム', 'ゴブリン'] },
+  { id: 'd_002', name: '迷いの森', maxFloors: 15, enemies: ['ゴブリン', 'ホーネット', 'キラービー'] },
+  { id: 'd_003', name: '正義の巨塔', maxFloors: 50, enemies: ['大コウモリ', '巨大コウモリ', '盗賊', '死に神'] }
+];
+
+const MASTER_ENEMIES = {
+  'スライム': { hp: 12, atk: 11, def: 2, exp: 1, drops: [{cat:'weapon', id:'w_000'}, {cat:'shield', id:'s_000'}] },
+  'ゴブリン': { hp: 22, atk: 15, def: 5, exp: 2, drops: [{cat:'weapon', id:'w_001'}] },
+  'ホーネット': { hp: 30, atk: 22, def: 8, exp: 3, drops: [{cat:'shield', id:'s_001'}] },
+  'キラービー': { hp: 45, atk: 30, def: 12, exp: 5, drops: [{cat:'shield', id:'s_002'}, {cat:'ring', id:'r_002'}] },
+  '大コウモリ': { hp: 50, atk: 35, def: 15, exp: 6, drops: [{cat:'ring', id:'r_000'}] },
+  '巨大コウモリ': { hp: 80, atk: 48, def: 22, exp: 10, drops: [{cat:'weapon', id:'w_004'}] },
+  '盗賊': { hp: 100, atk: 60, def: 30, exp: 15, drops: [{cat:'weapon', id:'w_003'}, {cat:'ring', id:'r_003'}] },
+  '死に神': { hp: 400, atk: 140, def: 70, exp: 80, drops: [{cat:'weapon', id:'w_005'}, {cat:'shield', id:'s_004'}] }
+};
+
+const ALL_ABILITIES = [
+  '耐久', '腕力', '頑丈', '機敏', '幸運',
+  '体力の鍛錬', '力の鍛錬', '守りの鍛錬',
+  '先制', '不屈', '一撃', '二撃', '宝物狩り'
+];
+
+// ===================== ゲーム状態(セーブデータ) =====================
+let state = {
+  inventory: [],
+  materials: { 'カタクナール': 5, '組成液': 2 },
+  equipped: { weapon: null, shield: null, ring: null },
+  mist: 0,
+  book: {
+    weapon: {},
+    shield: {},
+    ring: {}
+  }
+};
+
+// 探索中の一時状態
+let explore = {
+  active: false,
+  dungeonId: null,
+  floor: 1,
+  log: [],
+  // 冒険者実数値
+  p: { lv: 1, exp: 0, hp: 30, maxHp: 30, str: 10, vit: 10, spd: 1, luk: 1 },
+  // 成長・初期合算
+  growth: { hp1:30, str1:10, vit1:10, spd1:1, luk1:1, hpUp:10, strUp:1, vitUp:1, spdUp:1, lukUp:0 }
+};
+
+// ===================== 解析Lv・EXP =====================
+function expNeededForNextLv(currentLv) { return Math.pow(2, currentLv - 1); }
+
+function addAnalysisExp(category, id, amount) {
+  if (!state.book[category]) state.book[category] = {};
+  if (!state.book[category][id]) {
+    state.book[category][id] = { lv: 0, exp: 0 };
+  }
+  let b = state.book[category][id];
+  b.exp += amount;
+  while (true) {
+    let req = expNeededForNextLv(b.lv);
+    if (b.exp >= req) {
+      b.exp -= req;
+      b.lv++;
+    } else {
+      break;
     }
+  }
+}
 
-    function runDungeon(dungeon) {
-        // 報酬生成
-        const item = {
-            id: Date.now(),
-            name: ["鉄の剣", "皮の鎧", "魔力の欠片", "聖なる盾"][Math.floor(Math.random()*4)],
-            rarity: Math.floor(Math.random()*4) + 1,
-            atk: dungeon.difficulty * 50
-        };
-        state.inventory.push(item);
-        state.logs.unshift(`${dungeon.name}を探索完了！${item.name} を入手。`);
-        
-        // 進捗管理（クリアしたら次を解放）
-        if (dungeon.id === state.progress && state.progress < DUNGEONS.length - 1) {
-            state.progress++;
+function getAnalysisLv(category, id) {
+  if (state.book[category] && state.book[category][id]) {
+    return state.book[category][id].lv;
+  }
+  return 0;
+}
+
+// ===================== 便利ヘルパー =====================
+function generateUid() { return 'uid_' + Math.random().toString(36).substr(2, 9); }
+
+function findEquipDef(category, id) {
+  if (category === 'weapon') return MASTER_WEAPONS[id];
+  if (category === 'shield') return MASTER_SHIELDS[id];
+  if (category === 'ring') return MASTER_RINGS[id];
+  return null;
+}
+
+function rarityOf(corruption) {
+  if (corruption >= 40) return 'red';
+  if (corruption >= 20) return 'yellow';
+  if (corruption >= 5) return 'blue';
+  return 'white';
+}
+
+// アイテムのドロップ・生成
+function createDroppedItem(category, id, mistValue) {
+  const def = findEquipDef(category, id);
+  if (!def) return null;
+  
+  // 侵蝕度(corruption)決定
+  let corruption = 0;
+  if (mistValue > 0) {
+    let roll = Math.random() * mistValue;
+    corruption = Math.floor(roll + (Math.random() * 5));
+  }
+  if (Math.random() < 0.05) corruption += Math.floor(Math.random() * 10); // 低確率ブースト
+  
+  // 能力(abilities)決定(最大3個)
+  let abils = [];
+  if (category === 'ring' && def.abils) {
+    abils = [...def.abils];
+  } else {
+    let count = 0;
+    let r = Math.random();
+    if (r < 0.1) count = 3;
+    else if (r < 0.3) count = 2;
+    else if (r < 0.6) count = 1;
+    
+    // 霧濃度が高いと能力がつきやすい
+    if (mistValue >= 10 && count < 3 && Math.random() < 0.4) count++;
+    
+    let pool = [...ALL_ABILITIES];
+    for (let i = 0; i < count; i++) {
+      if (pool.length === 0) break;
+      let idx = Math.floor(Math.random() * pool.length);
+      abils.push(pool[idx]);
+      pool.splice(idx, 1);
+    }
+  }
+  
+  return {
+    uid: generateUid(),
+    category: category,
+    defId: id,
+    plus: 0,
+    corruption: corruption,
+    abilities: abils,
+    justEvolved: false
+  };
+}
+
+// ===================== ステータス計算エンジン(街) =====================
+function calcTownBaseStats() {
+  let hp1 = 30, str1 = 10, vit1 = 10, spd1 = 1, luk1 = 1;
+  
+  ['weapon', 'shield', 'ring'].forEach(cat => {
+    const itemUid = state.equipped[cat];
+    if (!itemUid) return;
+    const item = state.inventory.find(it => it.uid === itemUid);
+    if (!item) return;
+    const def = findEquipDef(cat, item.defId);
+    if (!def) return;
+    
+    // 侵蝕倍率
+    let cMult = 1 + (item.corruption * 0.1);
+    
+    hp1 += Math.floor((def.hp1 || 0) * cMult);
+    str1 += Math.floor((def.str1 || 0) * cMult);
+    vit1 += Math.floor((def.vit1 || 0) * cMult);
+    spd1 += Math.floor((def.spd1 || 0) * cMult);
+    luk1 += Math.floor((def.luk1 || 0) * cMult);
+    
+    // 特殊能力による基礎値補正
+    item.abilities.forEach(ab => {
+      if (ab === '耐久') hp1 += 15;
+      if (ab === '腕力') str1 += 5;
+      if (ab === '頑丈') vit1 += 5;
+      if (ab === '機敏') spd1 += 2;
+      if (ab === '幸運') luk1 += 2;
+    });
+  });
+  
+  return { hp1, str1, vit1, spd1, luk1 };
+}
+
+// ===================== 探索エンジン(コアロジック) =====================
+function startExplore(dungeonId) {
+  const dg = MASTER_DUNGEONS.find(d => d.id === dungeonId);
+  if (!dg) return;
+  
+  explore.active = true;
+  explore.dungeonId = dungeonId;
+  explore.floor = 1;
+  explore.log = [];
+  
+  // 1. 初期値と成長率の合算
+  let hp1 = 30, str1 = 10, vit1 = 10, spd1 = 1, luk1 = 1;
+  let hpUp = 10, strUp = 1, vitUp = 1, spdUp = 1, lukUp = 0;
+  
+  let pAtkBonus = 0; // 武器ATK
+  let pDefBonus = 0; // 盾DEF
+  
+  ['weapon', 'shield', 'ring'].forEach(cat => {
+    const itemUid = state.equipped[cat];
+    if (!itemUid) return;
+    const item = state.inventory.find(it => it.uid === itemUid);
+    if (!item) return;
+    const def = findEquipDef(cat, item.defId);
+    if (!def) return;
+    
+    let cMult = 1 + (item.corruption * 0.1);
+    let pMult = 1 + (item.plus * 0.05);
+    
+    hp1 += Math.floor((def.hp1 || 0) * cMult);
+    str1 += Math.floor((def.str1 || 0) * cMult);
+    vit1 += Math.floor((def.vit1 || 0) * cMult);
+    spd1 += Math.floor((def.spd1 || 0) * cMult);
+    luk1 += Math.floor((def.luk1 || 0) * cMult);
+    
+    hpUp += def.hpUp || 0;
+    strUp += def.strUp || 0;
+    vitUp += def.vitUp || 0;
+    // 原作準拠: spdUp, lukUp は固定だが、特殊能力で変化する拡張性用
+    
+    if (cat === 'weapon') {
+      // 武器の固有攻撃力にプラス値と侵蝕度を乗せる
+      pAtkBonus = Math.floor(20 * pMult * cMult); 
+    }
+    if (cat === 'shield') {
+      pDefBonus = Math.floor(15 * pMult * cMult);
+    }
+    
+    // アビリティ効果
+    item.abilities.forEach(ab => {
+      if (ab === '耐久') hp1 += 15;
+      if (ab === '腕力') str1 += 5;
+      if (ab === '頑丈') vit1 += 5;
+      if (ab === '機敏') spd1 += 2;
+      if (ab === '幸運') luk1 += 2;
+      
+      if (ab === '体力の鍛錬') hpUp += 4;
+      if (ab === '力の鍛錬') strUp += 1;
+      if (ab === '守りの鍛錬') vitUp += 1;
+    });
+  });
+  
+  explore.growth = { hp1, str1, vit1, spd1, luk1, hpUp, strUp, vitUp, spdUp, lukUp, pAtkBonus, pDefBonus };
+  
+  // 2. 冒険者インスタンス初期化(Lv1)
+  explore.p.lv = 1;
+  explore.p.exp = 0;
+  recalcPlayerStatsAtLv();
+  explore.p.hp = explore.p.maxHp; // 満タンスタート
+  
+  pushLog('sys', `ダンジョン【${dg.name}】に入場しました。(瘴気濃度: ${state.mist})`);
+  
+  // 画面遷移
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('[data-screen="log"]').classList.add('active');
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById('screen-log').classList.remove('hidden');
+  
+  document.getElementById('btnRetreat').disabled = false;
+  
+  updateLogScreenView();
+}
+
+function recalcPlayerStatsAtLv() {
+  const g = explore.growth;
+  const n = explore.p.lv - 1; // 上昇回数
+  
+  explore.p.maxHp = g.hp1 + (g.hpUp * n);
+  explore.p.str = g.str1 + (g.strUp * n);
+  explore.p.vit = g.vit1 + (g.vitUp * n);
+  explore.p.spd = g.spd1 + (g.spdUp * n);
+  explore.p.luk = g.luk1 + (g.lukUp * n);
+  
+  // 最終戦闘能力値
+  explore.p.atk = explore.p.str + g.pAtkBonus;
+  explore.p.def = explore.p.vit + g.pDefBonus;
+}
+
+function checkLevelUp() {
+  // 必要経験値: 次のLv * 15 と仮定
+  let req = explore.p.lv * 15;
+  if (explore.p.exp >= req) {
+    explore.p.exp -= req;
+    explore.p.lv++;
+    recalcPlayerStatsAtLv();
+    explore.p.hp = explore.p.maxHp; // レベルアップ時全回復(原作仕様)
+    pushLog('ev', `★ レベルが ${explore.p.lv} に上がった！ HPが全回復した。`);
+    checkLevelUp();
+  }
+}
+
+function pushLog(type, text) {
+  explore.log.push({ type, text });
+}
+
+// 1ターン/1歩進む処理
+function runOneTurn() {
+  if (!explore.active) return;
+  
+  const dg = MASTER_DUNGEONS.find(d => d.id === explore.dungeonId);
+  
+  // 一定確率でイベント: 泉 or 魔物遭遇 or 何もなし
+  let r = Math.random();
+  if (r < 0.15) {
+    // 泉イベント
+    let pool = ['HP', 'STR', 'VIT', 'SPD', 'LUK'];
+    let type = pool[Math.floor(Math.random() * pool.length)];
+    if (type === 'HP') {
+      explore.p.hp = Math.min(explore.p.maxHp, explore.p.hp + Math.floor(explore.p.maxHp * 0.3));
+      pushLog('ev', `不思議な泉を発見した。傷が癒えた。(HP回復)`);
+    } else if (type === 'STR') {
+      explore.p.atk += 3;
+      pushLog('ev', `湧き出る泉の水を飲んだ。力がみなぎる！(ATK+3)`);
+    } else if (type === 'VIT') {
+      explore.p.def += 3;
+      pushLog('ev', `清らかな泉で身を清めた。体が引き締まる。(DEF+3)`);
+    } else if (type === 'SPD') {
+      explore.p.spd += 1;
+      pushLog('ev', `心地よい泉の風を浴びた。体が軽くなる。(SPD+1)`);
+    } else {
+      explore.p.luk += 1;
+      pushLog('ev', `輝く泉にコインを投げ入れた。運気が上がる。(LUK+1)`);
+    }
+  } else if (r < 0.75) {
+    // 魔物遭遇
+    let enemyPool = dg.enemies;
+    // 階層が深いほど後半の敵が出やすい簡易ロジック
+    let eName = enemyPool[Math.floor(Math.random() * enemyPool.length)];
+    // 特定ダンジョンボス等の判定も本来はここ
+    executeCombat(eName);
+  } else {
+    pushLog('txt', `静かに通路を進んでいく… 周囲に異常はない。`);
+  }
+  
+  // 生存していれば、確率で次の階層へ
+  if (explore.p.hp > 0) {
+    if (Math.random() < 0.25) {
+      if (explore.floor >= dg.maxFloors) {
+        // ダンジョン踏破クリア！
+        pushLog('kill', `🎉 カタストロフ！ ${dg.name} を完全制覇した！`);
+        endExplore(true);
+        return;
+      } else {
+        explore.floor++;
+        pushLog('sys', `▼ 階段を降り、さらに深層の ${explore.floor}F へ進んだ。`);
+      }
+    }
+  } else {
+    // 死亡帰還
+    pushLog('hit-m', `☠ 冒険者は力尽き、意識が遠のいた…(街へ強制送還)`);
+    endExplore(false);
+    return;
+  }
+  
+  updateLogScreenView();
+}
+
+// 自動戦闘シミュレーション
+function executeCombat(eName) {
+  const edef = MASTER_ENEMIES[eName];
+  if (!edef) return;
+  
+  // 霧濃度による魔物強化
+  let mFactor = 1 + (state.mist * 0.15);
+  let e = {
+    name: eName,
+    hp: Math.floor(edef.hp * mFactor),
+    maxHp: Math.floor(edef.hp * mFactor),
+    atk: Math.floor(edef.atk * mFactor),
+    def: Math.floor(edef.def * mFactor),
+    exp: edef.exp
+  };
+  
+  pushLog('txt', `⚔ 凶悪な 【${e.name}】 が目の前に立ちはだかった！`);
+  
+  // アビリティ「先制」チェック
+  let hasPreempt = false;
+  ['weapon', 'shield', 'ring'].forEach(cat => {
+    let item = state.inventory.find(it => it.uid === state.equipped[cat]);
+    if (item && item.abilities.includes('先制')) hasPreempt = true;
+  });
+  
+  let pSpd = explore.p.spd;
+  let eSpd = 5; // モンスターの仮想速度
+  
+  let pTurn = true;
+  if (!hasPreempt && eSpd > pSpd) pTurn = false; // 敵が先手
+  
+  let rounds = 0;
+  while (explore.p.hp > 0 && e.hp > 0 && rounds < 30) {
+    rounds++;
+    if (pTurn) {
+      // プレイヤーの攻撃
+      let dmg = explore.p.atk - e.def;
+      if (dmg < 0) dmg = 0;
+      dmg += Math.floor(Math.random() * 6); // 0~5のランダム
+      
+      // アビリティ「一撃」や会心
+      let isCrit = Math.random() < 0.05;
+      ['weapon', 'shield', 'ring'].forEach(cat => {
+        let item = state.inventory.find(it => it.uid === state.equipped[cat]);
+        if (item && item.abilities.includes('一撃')) isCrit = true;
+      });
+      if (isCrit) { dmg *= 2; }
+      
+      e.hp -= dmg;
+      pushLog('hit-p', `${isCrit?'★会心の一撃！ ':''}冒険者の攻撃 ➔ ${e.name} に ${dmg} のダメージ！`);
+      
+      // アビリティ「二撃」(20%で連続)
+      if (e.hp > 0) {
+        let hasDouble = false;
+        ['weapon', 'shield', 'ring'].forEach(cat => {
+          let item = state.inventory.find(it => it.uid === state.equipped[cat]);
+          if (item && item.abilities.includes('二撃')) hasDouble = true;
+        });
+        if (hasDouble && Math.random() < 0.20) {
+          let dmg2 = Math.floor((explore.p.atk - e.def) * 0.7) + Math.floor(Math.random() * 4);
+          if (dmg2 < 1) dmg2 = 1;
+          e.hp -= dmg2;
+          pushLog('hit-p', ` ⚔ 追撃！ 冒険者の連続攻撃 ➔ ${e.name} に ${dmg2} のダメージ！`);
         }
-        render();
+      }
+    } else {
+      // 敵の攻撃
+      let dmg = e.atk - explore.p.def;
+      if (dmg < 0) dmg = 0;
+      dmg += Math.floor(Math.random() * 6);
+      
+      // 不屈アビリティのチェック用に食らう前HP保存
+      let preHp = explore.p.hp;
+      explore.p.hp -= dmg;
+      pushLog('hit-m', `◀ ${e.name} の痛烈な一撃 ➔ 冒険者は ${dmg} のダメージを受けた！`);
+      
+      if (explore.p.hp <= 0) {
+        let hasUndying = false;
+        ['weapon', 'shield', 'ring'].forEach(cat => {
+          let item = state.inventory.find(it => it.uid === state.equipped[cat]);
+          if (item && item.abilities.includes('不屈')) hasUndying = true;
+        });
+        if (hasUndying && preHp > 1) {
+          explore.p.hp = 1;
+          pushLog('ev', ` 🛡 アビリティ【不屈】が発動！ HP 1 で耐え抜いた！`);
+        }
+      }
     }
-
-    function render() {
-        // ダンジョン描画
-        document.getElementById('dungeon-list').innerHTML = DUNGEONS.map(d => {
-            const isLocked = d.id > state.progress;
-            return `
-                <div class="card">
-                    <h4>${d.name} (Lv.${d.difficulty})</h4>
-                    <button class="btn ${isLocked ? 'btn-lock' : 'btn-active'}" 
-                            onclick="${isLocked ? '' : 'runDungeon(' + JSON.stringify(d).replace(/"/g, "'") + ')'}"
-                            ${isLocked ? 'disabled' : ''}>
-                        ${isLocked ? '🔒 ロック中' : '探索開始'}
-                    </button>
-                </div>
-            `;
-        }).join('');
-
-        // ログ描画
-        document.getElementById('log-list').innerHTML = state.logs.map(l => `<div class="log-item">${l}</div>`).join('');
+    pTurn = !pTurn;
+  }
+  
+  if (explore.p.hp > 0 && e.hp <= 0) {
+    // 勝利
+    pushLog('kill', `☠ 【${e.name}】 を撃破した！`);
+    explore.p.exp += e.exp;
+    
+    // ドロップ判定
+    if (edef.drops && edef.drops.length > 0) {
+      let hasHunter = false;
+      ['weapon', 'shield', 'ring'].forEach(cat => {
+        let item = state.inventory.find(it => it.uid === state.equipped[cat]);
+        if (item && item.abilities.includes('宝物狩り')) hasHunter = true;
+      });
+      
+      let dropChance = hasHunter ? 0.60 : 0.35; // 宝物狩りで確率アップ
+      if (Math.random() < dropChance) {
+        let dropDef = edef.drops[Math.floor(Math.random() * edef.drops.length)];
+        let newItem = createDroppedItem(dropDef.cat, dropDef.id, state.mist);
+        state.inventory.push(newItem);
+        
+        // 図鑑用の解析EXPを加算(入手時に自動)
+        addAnalysisExp(dropDef.cat, dropDef.id, 1);
+        
+        pushLog('get', `🎁 【${itemDisplayName(newItem)}】 を拾い、カバンに入れた！`);
+      }
     }
+    
+    // 確率で素材・薬品ドロップ
+    if (Math.random() < 0.25) {
+      let matName = Math.random() < 0.7 ? 'カタクナール' : '組成液';
+      state.materials[matName]++;
+      pushLog('get', `🧪 薬品【${matName}】を回収した。`);
+    }
+    
+    checkLevelUp();
+  }
+}
 
-    render();
+function endExplore(success) {
+  explore.active = false;
+  document.getElementById('btnRetreat').disabled = true;
+  pushLog('sys', success ? "ーーー 探索成功 街へ帰還しました ーーー" : "ーーー 探索失敗 命からがら街へ逃げ帰りました ーーー");
+  updateLogScreenView();
+  
+  // 街のベース能力表示再計算
+  renderStatusScreen();
+}
+
+function retreatExplore() {
+  if (!explore.active) return;
+  pushLog('sys', `🏃 危険を察知し、途中で街への退却を選択した…`);
+  endExplore(true);
+}
+
+
+// ===================== UIレンダリングロジック =====================
+function itemDisplayName(item) {
+  const def = findEquipDef(item.category, item.defId);
+  return def.name; // ★修正箇所: 常に本名を返す
+}
+
+function renderItemCard(item, opts) {
+  opts = opts || {};
+  const def = findEquipDef(item.category, item.defId);
+  const isEquipped = state.equipped[item.category] === item.uid;
+  const r = rarityOf(item.corruption);
+  const div = document.createElement('div');
+  div.className = 'item-card' + (isEquipped ? ' equipped' : '') + (item.justEvolved ? ' flash-evolve' : '') + (opts.selected ? ' selected' : '');
+  item.justEvolved = false;
+  
+  const knownName = true; // ★修正箇所: 常に真とし名前をカラーで出す
+  const nameText = itemDisplayName(item) + (item.plus > 0 ? ` +${item.plus}` : '');
+  
+  let abilsText = item.abilities.length > 0 ? item.abilities.join(' / ') : '能力なし';
+  if (item.corruption > 0) abilsText = `[侵蝕 ${item.corruption}] ` + abilsText;
+  
+  div.innerHTML = `
+    <div class="ic-left">
+      <div class="ic-name rarity-${r}">${nameText}</div>
+      <div class="ic-abilities">${abilsText}</div>
+    </div>
+    <div class="ic-right">
+      <div>${item.category.toUpperCase()}</div>
+      <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">解析Lv.${getAnalysisLv(item.category, item.defId)}</div>
+    </div>
+  `;
+  return div;
+}
+
+// 倉庫画面更新
+let currentItemFilter = 'all';
+let selectedItemUid = null;
+
+function renderItemList() {
+  const container = document.getElementById('lstInventory');
+  container.innerHTML = '';
+  
+  let list = state.inventory;
+  if (currentItemFilter !== 'all') {
+    list = list.filter(it => it.category === currentItemFilter);
+  }
+  
+  if (list.length === 0) {
+    container.innerHTML = '<div style="text-align:center; color:var(--text-dim); padding:20px;">倉庫にアイテムがありません</div>';
+    return;
+  }
+  
+  list.forEach(item => {
+    let card = renderItemCard(item, { selected: item.uid === selectedItemUid });
+    card.onclick = () => {
+      selectedItemUid = item.uid;
+      renderItemList();
+      renderItemDetail(item);
+    };
+    container.appendChild(card);
+  });
+}
+
+function renderMaterialGrid() {
+  const container = document.getElementById('gridMaterials');
+  container.innerHTML = '';
+  for (let key in state.materials) {
+    let div = document.createElement('div');
+    div.className = 'mat-card';
+    div.innerHTML = `
+      <div class="mat-name">${key}</div>
+      <div class="mat-count">${state.materials[key]}</div>
+    `;
+    container.appendChild(div);
+  }
+}
+
+// 詳細パネルの表示
+function renderItemDetail(item) {
+  const pnl = document.getElementById('pnlItemDetail');
+  pnl.classList.remove('hidden');
+  pnl.innerHTML = '';
+  
+  const def = findEquipDef(item.category, item.defId);
+  const alv = getAnalysisLv(item.category, item.defId);
+  const isEquipped = state.equipped[item.category] === item.uid;
+  
+  let cMult = 1 + (item.corruption * 0.1);
+  
+  // パラメータ行組み立て関数
+  function row(label, v1, vUp) {
+    if (v1 === undefined) v1 = 0;
+    if (vUp === undefined) vUp = 0;
+    
+    // 解析Lvに応じたマスク
+    let showV1 = alv >= 1 ? Math.floor(v1 * cMult) : '？？';
+    let showVUp = alv >= 2 ? vUp : '？？';
+    
+    let sign = vUp >= 0 ? `+${showVUp}` : `${showVUp}`;
+    let vUpClass = vUp > 0 ? 'diff-pos' : (vUp < 0 ? 'diff-neg' : '');
+    
+    return `
+      <tr>
+        <td style="font-weight:bold;">${label}</td>
+        <td style="text-align:right;">${showV1}</td>
+        <td style="text-align:right;" class="${vUpClass}">${sign}</td>
+      </tr>
+    `;
+  }
+  
+  let nextExp = expNeededForNextLv(alv);
+  let currentExpObj = state.book[item.category][item.defId] || { exp: 0 };
+  
+  let html = `
+    <div class="dp-title-row">
+      <div>
+        <div class="dp-title">${itemDisplayName(item)}</div>
+        <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">
+          解析度: Lv.${alv} (EXP: ${currentExpObj.exp} / ${nextExp})
+        </div>
+      </div>
+      <span class="dp-cat">${item.category.toUpperCase()}</span>
+    </div>
+    
+    <table class="param-table">
+      <thead>
+        <tr>
+          <th style="width:40%;">ステータス</th>
+          <th style="text-align:right;">Lv1上昇値</th>
+          <th style="text-align:right;">LvUP上昇量</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${row('HP', def.hp1, def.hpUp)}
+        ${row('STR', def.str1, def.strUp)}
+        ${row('VIT', def.vit1, def.vitUp)}
+        ${row('SPD', def.spd1, 0)}
+        ${row('LUK', def.luk1, 0)}
+      </tbody>
+    </table>
+    
+    <div style="font-size:11px; color:var(--text-dim); background:var(--panel2); padding:8px; border-radius:4px; margin-bottom:12px;">
+      <strong>【付加アビリティ】</strong><br>
+      ${item.abilities.length > 0 ? item.abilities.map(a => `・${a}`).join('<br>') : 'なし'}<br>
+      ${def.type ? `・[固有属性] ${def.type}<br>` : ''}
+      ${def.target ? `・[派生ヒント] 合成進化の兆候あり<br>` : ''}
+    </div>
+    
+    <div class="dp-actions">
+      <button class="btn btn-sm" id="btnEquipAction">${isEquipped ? 'はずす' : '装備する'}</button>
+      <button class="btn btn-sm btn-outline" id="btnEnhanceAction" ${state.materials['カタクナール'] <= 0 ? 'disabled' : ''}>
+        <i class="fa-solid fa-hammer"></i> カタクナール強化 (-1)
+      </button>
+      <button class="btn btn-sm btn-outline btn-danger" id="btnDiscardAction" ${isEquipped ? 'disabled' : ''} style="margin-left:auto;">
+        処分
+      </button>
+    </div>
+  `;
+  
+  pnl.innerHTML = html;
+  
+  // イベントバインド
+  document.getElementById('btnEquipAction').onclick = () => {
+    if (isEquipped) {
+      state.equipped[item.category] = null;
+    } else {
+      state.equipped[item.category] = item.uid;
+    }
+    renderItemDetail(item);
+    renderItemList();
+    renderStatusScreen();
+  };
+  
+  document.getElementById('btnEnhanceAction').onclick = () => {
+    if (state.materials['カタクナール'] <= 0) return;
+    state.materials['カタクナール']--;
+    item.plus++;
+    
+    // 解析EXPを強化でも獲得可能
+    addAnalysisExp(item.category, item.defId, 1);
+    
+    // 派生進化の判定チェック(武器/盾でターゲット先がある場合)
+    let evolved = false;
+    if (item.category === 'weapon' && def.target && item.plus >= 3) {
+      // 倉庫または装備に「必要盾」があるかチェック
+      let hasTargetShield = state.inventory.some(s => s.category === 'shield' && s.defId === def.target);
+      if (hasTargetShield) {
+        // 進化！
+        let nextKeys = Object.keys(MASTER_WEAPONS);
+        let currIdx = nextKeys.indexOf(item.defId);
+        if (currIdx !== -1 && nextKeys[currIdx + 1]) {
+          item.defId = nextKeys[currIdx + 1]; // └つきの上位版へ
+          item.plus = 0; // プラス値リセット
+          item.justEvolved = true;
+          evolved = true;
+        }
+      }
+    }
+    
+    renderMaterialGrid();
+    renderItemDetail(item);
+    renderItemList();
+  };
+  
+  document.getElementById('btnDiscardAction').onclick = () => {
+    state.inventory = state.inventory.filter(it => it.uid !== item.uid);
+    pnl.classList.add('hidden');
+    selectedItemUid = null;
+    renderItemList();
+  };
+}
+
+// 街(ステータス)画面更新
+function renderStatusScreen() {
+  let base = calcTownBaseStats();
+  document.getElementById('bStat-hp').innerText = base.hp1;
+  document.getElementById('bStat-str').innerText = base.str1;
+  document.getElementById('bStat-vit').innerText = base.vit1;
+  document.getElementById('bStat-spd').innerText = base.spd1;
+  document.getElementById('bStat-luk').innerText = base.luk1;
+  
+  document.getElementById('lblTownHp').innerText = `HP ${base.hp1} / ${base.hp1}`;
+  document.getElementById('pbTownHp').style.width = '100%';
+  
+  ['weapon', 'shield', 'ring'].forEach(cat => {
+    let uuid = state.equipped[cat];
+    let nameLbl = document.getElementById(`eqName-${cat}`);
+    let abilLbl = document.getElementById(`eqAbil-${cat}`);
+    if (uuid) {
+      let item = state.inventory.find(it => it.uid === uuid);
+      if (item) {
+        let pTxt = item.plus > 0 ? ` +${item.plus}` : '';
+        nameLbl.innerText = itemDisplayName(item) + pTxt;
+        let rare = rarityOf(item.corruption);
+        nameLbl.className = `eq-itemname rarity-${rare}`;
+        
+        let sub = item.abilities.join(' / ');
+        if (item.corruption > 0) sub = `[侵蝕 ${item.corruption}] ` + sub;
+        abilLbl.innerText = sub || '追加効果なし';
+        return;
+      }
+    }
+    nameLbl.innerText = cat === 'weapon' ? '素手' : 'なし';
+    nameLbl.className = 'eq-itemname';
+    abilLbl.innerText = '';
+  });
+}
+
+// ダンジョン画面更新
+function renderDungeonList() {
+  const container = document.getElementById('lstDungeons');
+  container.innerHTML = '';
+  MASTER_DUNGEONS.forEach(dg => {
+    let div = document.createElement('div');
+    div.className = 'dg-card';
+    div.innerHTML = `
+      <div class="dg-info">
+        <div class="dg-name">${dg.name}</div>
+        <div class="dg-floors">全 ${dg.maxFloors} 階層</div>
+      </div>
+      <button class="btn btn-sm" id="btnGo-${dg.id}">出発する</button>
+    `;
+    container.appendChild(div);
+    document.getElementById(`btnGo-${dg.id}`).onclick = () => {
+      startExplore(dg.id);
+    };
+  });
+}
+
+// 探索ログ画面更新
+function updateLogScreenView() {
+  const dg = MASTER_DUNGEONS.find(d => d.id === explore.dungeonId);
+  if (!dg) return;
+  
+  document.getElementById('lblLogDungeonName').innerText = dg.name;
+  document.getElementById('lblLogFloor').innerText = `${explore.floor}F / ${dg.maxFloors}F`;
+  document.getElementById('lblLogPlayerState').innerText = explore.active ? '探索中…' : '街に帰還';
+  
+  document.getElementById('lblLogPName').innerText = `冒険者 (Lv.${explore.p.lv})`;
+  document.getElementById('lblLogPHp').innerText = `HP ${explore.p.hp} / ${explore.p.maxHp}`;
+  
+  let pct = Math.max(0, (explore.p.hp / explore.p.maxHp) * 100);
+  document.getElementById('pbLogPHp').style.width = pct + '%';
+  
+  document.getElementById('lblLogPSubStats').innerHTML = `
+    <span>ATK: ${explore.p.atk} / DEF: ${explore.p.def}</span>
+    <span>SPD: ${explore.p.spd} / LUK: ${explore.p.luk}</span>
+  `;
+  
+  // ログテキスト
+  const box = document.getElementById('boxLog');
+  box.innerHTML = '';
+  explore.log.forEach((l, index) => {
+    let row = document.createElement('div');
+    row.className = 'l-row';
+    row.innerHTML = `<span class="l-turn">[#${index+1}]</span><span class="l-${l.type}">${l.text}</span>`;
+    box.appendChild(row);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+
+// 図鑑(ブック)画面の更新
+function renderBookScreen() {
+  const container = document.getElementById('lstBook');
+  container.innerHTML = '';
+  
+  let currentCat = document.querySelector('#bookFilterRow .filter-chip.active').dataset.filter;
+  let pool = {};
+  if (currentCat === 'weapon') pool = MASTER_WEAPONS;
+  if (currentCat === 'shield') pool = MASTER_SHIELDS;
+  if (currentCat === 'ring') pool = MASTER_RINGS;
+  
+  for (let id in pool) {
+    let def = pool[id];
+    let alv = getAnalysisLv(currentCat, id);
+    let div = document.createElement('div');
+    div.className = 'item-card';
+    
+    let nextExp = expNeededForNextLv(alv);
+    let currExp = (state.book[currentCat] && state.book[currentCat][id]) ? state.book[currentCat][id].exp : 0;
+    
+    div.innerHTML = `
+      <div class="ic-left">
+        <div class="ic-name">${def.name}</div>
+        <div class="ic-sub" style="color:var(--text-dim); margin-top:2px;">
+          ${alv >= 1 ? `HP+${def.hp1||0} STR+${def.str1||0} VIT+${def.vit1||0}` : '能力値：未解析'}
+        </div>
+      </div>
+      <div class="ic-right">
+        <div style="font-weight:bold; color:var(--accent);">解析Lv.${alv}</div>
+        <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">EXP: ${currExp}/${nextExp}</div>
+      </div>
+    `;
+    container.appendChild(div);
+  }
+}
+
+// ===================== イベント設定・ナビゲーション =====================
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById('screen-0' + btn.dataset.screen || 'screen-' + btn.dataset.screen).classList.remove('hidden');
+    
+    // 互換性維持
+    let sId = btn.dataset.screen;
+    const targetScreen = document.getElementById('screen-' + sId);
+    if(targetScreen) targetScreen.classList.remove('hidden');
+    
+    if (sId === 'item') { renderItemList(); renderMaterialGrid(); }
+    if (sId === 'status') renderStatusScreen();
+    if (sId === 'dungeon') renderDungeonList();
+  };
+});
+
+// 倉庫フィルタ
+document.querySelectorAll('#itemFilterRow .filter-chip').forEach(chip => {
+  chip.onclick = () => {
+    document.querySelectorAll('#itemFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    currentItemFilter = chip.dataset.filter;
+    renderItemList();
+  };
+});
+
+// 図鑑フィルタ
+document.querySelectorAll('#bookFilterRow .filter-chip').forEach(chip => {
+  chip.onclick = () => {
+    document.querySelectorAll('#bookFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    renderBookScreen();
+  };
+});
+
+// 霧調整
+document.getElementById('btnMistUp').onclick = () => {
+  state.mist++;
+  document.getElementById('lblMistValue').innerText = state.mist;
+};
+document.getElementById('btnMistDown').onclick = () => {
+  if (state.mist > 0) state.mist--;
+  document.getElementById('lblMistValue').innerText = state.mist;
+};
+
+// はずすボタン(メイン画面直通)
+document.querySelectorAll('.btn-unequip').forEach(btn => {
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    let cat = btn.dataset.cat;
+    state.equipped[cat] = null;
+    renderStatusScreen();
+  };
+});
+
+// 図鑑モーダル開閉
+document.getElementById('btnBook').onclick = () => {
+  document.getElementById('mdlBook').classList.remove('hidden');
+  renderBookScreen();
+};
+document.getElementById('btnCloseBook').onclick = () => {
+  document.getElementById('mdlBook').classList.add('hidden');
+};
+
+document.getElementById('btnNextStep').onclick = runOneTurn;
+document.getElementById('btnRetreat').onclick = retreatExplore;
+
+// ===================== 初期化 =====================
+function init() {
+  // 初期解析レベルの設定を仕込んでおく
+  state.book['weapon']['w_000'] = { lv: 2, exp: 0 };
+  state.book['shield']['s_000'] = { lv: 2, exp: 0 };
+  state.book['ring']['r_000'] = { lv: 2, exp: 0 };
+
+  const startWeapon = createDroppedItem('weapon', 'w_000', 0); // 木の棒
+  const startShield = createDroppedItem('shield', 's_000', 0); // なべのふた
+  const startRing = createDroppedItem('ring', 'r_000', 0);     // 銅の指輪
+  
+  [startWeapon, startShield, startRing].forEach(it => { it.abilities = []; });
+  
+  state.inventory.push(startWeapon, startShield, startRing);
+  state.equipped.weapon = startWeapon.uid;
+  state.equipped.shield = startShield.uid;
+  state.equipped.ring = startRing.uid;
+  
+  renderStatusScreen();
+}
+
+init();
 </script>
 </body>
 </html>
