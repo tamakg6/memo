@@ -116,7 +116,7 @@
   .btn-outline:hover { background: var(--panel2); }
   
   .section-title {
-    font-size: 14px;
+    font-size: 12px;
     color: var(--text-dim);
     margin: 16px 0 8px 0;
     font-weight: bold;
@@ -186,12 +186,6 @@
   .rarity-yellow { color: var(--yellow); font-weight: bold; }
   .rarity-red { color: var(--red); font-weight: bold; }
   
-  /* 素材グリッド */
-  .material-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
-  .mat-card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 8px; text-align: center; }
-  .mat-name { font-size: 12px; margin-bottom: 4px; color: var(--text-dim); }
-  .mat-count { font-size: 16px; font-weight: bold; color: var(--gold); }
-  
   /* 詳細モーダル風パネル */
   .detail-panel {
     background: var(--panel);
@@ -212,12 +206,6 @@
   .diff-neg { color: var(--danger); font-weight: bold; }
   
   .dp-actions { display: flex; gap: 8px; margin-top: 12px; }
-  
-  /* 霧画面 */
-  .mist-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
-  .mist-val { font-size: 36px; font-weight: bold; color: #a18fff; margin: 12px 0; font-family: monospace; }
-  .mist-desc { font-size: 12px; color: var(--text-dim); text-align: left; background: var(--panel2); padding: 12px; border-radius: 6px; line-height: 1.5; }
-  .mist-ctrls { display: flex; justify-content: center; gap: 16px; margin-bottom: 16px; }
   
   /* ダンジョン画面 */
   .dg-list { display: flex; flex-direction: column; gap: 12px; }
@@ -252,8 +240,7 @@
 <div class="topbar">
   <div class="topbar-title">WHIPPER BROWSER</div>
   <div class="topbar-right">
-    <button class="btn btn-sm btn-outline" id="btnBook"><i class="fa-solid fa-book"></i> 図鑑</button>
-  </div>
+    </div>
 </div>
 
 <div id="screen-status" class="screen">
@@ -263,7 +250,7 @@
       <div class="sh-lv" id="lblTownLv">Lv 1</div>
     </div>
     <div class="sh-hp-bar-bg"><div class="sh-hp-bar-fill" id="pbTownHp"></div></div>
-    <div class="sh-hp-txt" id="lblTownHp">HP 30 / 30</div>
+    <div class="sh-hp-txt" id="lblTownHp">HP -- / --</div>
   </div>
   
   <div class="section-title">現在の装備品</div>
@@ -302,17 +289,6 @@
       <button class="btn btn-sm btn-outline btn-unequip" data-cat="ring">はずす</button>
     </div>
   </div>
-  
-  <div class="section-title" style="margin-top:20px;">街でのベース能力 (装備Lv1合計)</div>
-  <div class="status-header-card" style="background:var(--panel2); padding:12px;">
-    <table class="param-table" style="margin-bottom:0;">
-      <tr><td>HP</td><td id="bStat-hp" style="text-align:right; font-weight:bold;">30</td></tr>
-      <tr><td>STR</td><td id="bStat-str" style="text-align:right; font-weight:bold;">10</td></tr>
-      <tr><td>VIT</td><td id="bStat-vit" style="text-align:right; font-weight:bold;">10</td></tr>
-      <tr><td>SPD</td><td id="bStat-spd" style="text-align:right; font-weight:bold;">1</td></tr>
-      <tr><td>LUK</td><td id="bStat-luk" style="text-align:right; font-weight:bold;">1</td></tr>
-    </table>
-  </div>
 </div>
 
 <div id="screen-item" class="screen hidden">
@@ -326,25 +302,6 @@
   
   <div id="pnlItemDetail" class="detail-panel hidden">
     </div>
-  
-  <div class="section-title" style="margin-top:24px;">所持している素材・薬品</div>
-  <div class="material-grid" id="gridMaterials"></div>
-</div>
-
-<div id="screen-mist" class="screen hidden">
-  <div class="mist-card">
-    <div class="section-title" style="margin:0;">現在の瘴気濃度</div>
-    <div class="mist-val" id="lblMistValue">0</div>
-    <div class="mist-ctrls">
-      <button class="btn btn-outline" id="btnMistDown" style="width:60px;"><i class="fa-solid fa-minus"></i></button>
-      <button class="btn" id="btnMistUp" style="width:60px;"><i class="fa-solid fa-plus"></i></button>
-    </div>
-    <div class="mist-desc">
-      <strong>【瘴気濃度の効果】</strong><br>
-      濃度を上げるとダンジョン内の魔物が著しく強化（HP・ATK・DEF・速度が上昇）されますが、帰還時に持ち帰る装備品に高レベルの<strong>「侵蝕度」</strong>が付与されやすくなります。<br>
-      侵蝕された装備は基礎ステータスが数倍〜数十倍に跳ね上がります。
-    </div>
-  </div>
 </div>
 
 <div id="screen-dungeon" class="screen hidden">
@@ -363,7 +320,7 @@
   <div class="status-header-card" style="padding:10px 14px; margin-bottom:12px; background:var(--panel2);">
     <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
       <span id="lblLogPName" style="font-weight:bold;">冒険者 (Lv.1)</span>
-      <span id="lblLogPHp">HP 30 / 30</span>
+      <span id="lblLogPHp">HP -- / --</span>
     </div>
     <div class="sh-hp-bar-bg" style="height:6px;"><div class="sh-hp-bar-fill" id="pbLogPHp" style="width:100%;"></div></div>
     <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-dim); margin-top:2px;" id="lblLogPSubStats">
@@ -379,17 +336,11 @@
   </div>
 </div>
 
-<div id="mdlBook" class="screen hidden" style="position:fixed; top:48px; bottom:56px; left:0; right:0; background:var(--bg); z-index:200; overflow-y:auto; padding:16px;">
-  <div style="display:flex; justify-content:between; align-items:center; margin-bottom:16px;">
-    <div class="section-title" style="margin:0;">アイテム解析図鑑</div>
-    <button class="btn btn-sm btn-outline" id="btnCloseBook" style="margin-left:auto;">閉じる</button>
-  </div>
-  <div class="filter-row" id="bookFilterRow">
-    <div class="filter-chip active" data-filter="weapon">武器</div>
-    <div class="filter-chip" data-filter="shield">盾</div>
-    <div class="filter-chip" data-filter="ring">指輪</div>
-  </div>
-  <div class="item-list" id="lstBook"></div>
+<div class="nav-grid">
+  <button class="tab-btn active" data-screen="status"><i class="fa-solid fa-user"></i>街</button>
+  <button class="tab-btn" data-screen="item"><i class="fa-solid fa-box-archive"></i>倉庫</button>
+  <button class="tab-btn" data-screen="dungeon"><i class="fa-solid fa-dungeon"></i>冒険</button>
+  <button class="tab-btn" data-screen="log"><i class="fa-solid fa-scroll"></i>ログ</button>
 </div>
 
 
@@ -445,14 +396,7 @@ const ALL_ABILITIES = [
 // ===================== ゲーム状態(セーブデータ) =====================
 let state = {
   inventory: [],
-  materials: { 'カタクナール': 5, '組成液': 2 },
-  equipped: { weapon: null, shield: null, ring: null },
-  mist: 0,
-  book: {
-    weapon: {},
-    shield: {},
-    ring: {}
-  }
+  equipped: { weapon: null, shield: null, ring: null }
 };
 
 // 探索中の一時状態
@@ -469,31 +413,6 @@ let explore = {
 
 // ===================== 解析Lv・EXP =====================
 function expNeededForNextLv(currentLv) { return Math.pow(2, currentLv - 1); }
-
-function addAnalysisExp(category, id, amount) {
-  if (!state.book[category]) state.book[category] = {};
-  if (!state.book[category][id]) {
-    state.book[category][id] = { lv: 0, exp: 0 };
-  }
-  let b = state.book[category][id];
-  b.exp += amount;
-  while (true) {
-    let req = expNeededForNextLv(b.lv);
-    if (b.exp >= req) {
-      b.exp -= req;
-      b.lv++;
-    } else {
-      break;
-    }
-  }
-}
-
-function getAnalysisLv(category, id) {
-  if (state.book[category] && state.book[category][id]) {
-    return state.book[category][id].lv;
-  }
-  return 0;
-}
 
 // ===================== 便利ヘルパー =====================
 function generateUid() { return 'uid_' + Math.random().toString(36).substr(2, 9); }
@@ -513,31 +432,22 @@ function rarityOf(corruption) {
 }
 
 // アイテムのドロップ・生成
-function createDroppedItem(category, id, mistValue) {
+function createDroppedItem(category, id, corruptionForce) {
   const def = findEquipDef(category, id);
   if (!def) return null;
   
-  // 侵蝕度(corruption)決定
-  let corruption = 0;
-  if (mistValue > 0) {
-    let roll = Math.random() * mistValue;
-    corruption = Math.floor(roll + (Math.random() * 5));
-  }
-  if (Math.random() < 0.05) corruption += Math.floor(Math.random() * 10); // 低確率ブースト
+  let corruption = corruptionForce !== undefined ? corruptionForce : Math.floor(Math.random() * 5);
+  if (Math.random() < 0.05) corruption += Math.floor(Math.random() * 10);
   
-  // 能力(abilities)決定(最大3個)
   let abils = [];
   if (category === 'ring' && def.abils) {
     abils = [...def.abils];
   } else {
     let count = 0;
     let r = Math.random();
-    if (r < 0.1) count = 3;
-    else if (r < 0.3) count = 2;
-    else if (r < 0.6) count = 1;
-    
-    // 霧濃度が高いと能力がつきやすい
-    if (mistValue >= 10 && count < 3 && Math.random() < 0.4) count++;
+    if (r < 0.05) count = 3;
+    else if (r < 0.15) count = 2;
+    else if (r < 0.4) count = 1;
     
     let pool = [...ALL_ABILITIES];
     for (let i = 0; i < count; i++) {
@@ -555,42 +465,10 @@ function createDroppedItem(category, id, mistValue) {
     plus: 0,
     corruption: corruption,
     abilities: abils,
+    analysisLv: 0,
+    analysisExp: 0,
     justEvolved: false
   };
-}
-
-// ===================== ステータス計算エンジン(街) =====================
-function calcTownBaseStats() {
-  let hp1 = 30, str1 = 10, vit1 = 10, spd1 = 1, luk1 = 1;
-  
-  ['weapon', 'shield', 'ring'].forEach(cat => {
-    const itemUid = state.equipped[cat];
-    if (!itemUid) return;
-    const item = state.inventory.find(it => it.uid === itemUid);
-    if (!item) return;
-    const def = findEquipDef(cat, item.defId);
-    if (!def) return;
-    
-    // 侵蝕倍率
-    let cMult = 1 + (item.corruption * 0.1);
-    
-    hp1 += Math.floor((def.hp1 || 0) * cMult);
-    str1 += Math.floor((def.str1 || 0) * cMult);
-    vit1 += Math.floor((def.vit1 || 0) * cMult);
-    spd1 += Math.floor((def.spd1 || 0) * cMult);
-    luk1 += Math.floor((def.luk1 || 0) * cMult);
-    
-    // 特殊能力による基礎値補正
-    item.abilities.forEach(ab => {
-      if (ab === '耐久') hp1 += 15;
-      if (ab === '腕力') str1 += 5;
-      if (ab === '頑丈') vit1 += 5;
-      if (ab === '機敏') spd1 += 2;
-      if (ab === '幸運') luk1 += 2;
-    });
-  });
-  
-  return { hp1, str1, vit1, spd1, luk1 };
 }
 
 // ===================== 探索エンジン(コアロジック) =====================
@@ -607,8 +485,8 @@ function startExplore(dungeonId) {
   let hp1 = 30, str1 = 10, vit1 = 10, spd1 = 1, luk1 = 1;
   let hpUp = 10, strUp = 1, vitUp = 1, spdUp = 1, lukUp = 0;
   
-  let pAtkBonus = 0; // 武器ATK
-  let pDefBonus = 0; // 盾DEF
+  let pAtkBonus = 0;
+  let pDefBonus = 0;
   
   ['weapon', 'shield', 'ring'].forEach(cat => {
     const itemUid = state.equipped[cat];
@@ -630,17 +508,14 @@ function startExplore(dungeonId) {
     hpUp += def.hpUp || 0;
     strUp += def.strUp || 0;
     vitUp += def.vitUp || 0;
-    // 原作準拠: spdUp, lukUp は固定だが、特殊能力で変化する拡張性用
     
     if (cat === 'weapon') {
-      // 武器の固有攻撃力にプラス値と侵蝕度を乗せる
       pAtkBonus = Math.floor(20 * pMult * cMult); 
     }
     if (cat === 'shield') {
       pDefBonus = Math.floor(15 * pMult * cMult);
     }
     
-    // アビリティ効果
     item.abilities.forEach(ab => {
       if (ab === '耐久') hp1 += 15;
       if (ab === '腕力') str1 += 5;
@@ -660,9 +535,9 @@ function startExplore(dungeonId) {
   explore.p.lv = 1;
   explore.p.exp = 0;
   recalcPlayerStatsAtLv();
-  explore.p.hp = explore.p.maxHp; // 満タンスタート
+  explore.p.hp = explore.p.maxHp;
   
-  pushLog('sys', `ダンジョン【${dg.name}】に入場しました。(瘴気濃度: ${state.mist})`);
+  pushLog('sys', `ダンジョン【${dg.name}】に入場しました。`);
   
   // 画面遷移
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -677,7 +552,7 @@ function startExplore(dungeonId) {
 
 function recalcPlayerStatsAtLv() {
   const g = explore.growth;
-  const n = explore.p.lv - 1; // 上昇回数
+  const n = explore.p.lv - 1;
   
   explore.p.maxHp = g.hp1 + (g.hpUp * n);
   explore.p.str = g.str1 + (g.strUp * n);
@@ -685,19 +560,17 @@ function recalcPlayerStatsAtLv() {
   explore.p.spd = g.spd1 + (g.spdUp * n);
   explore.p.luk = g.luk1 + (g.lukUp * n);
   
-  // 最終戦闘能力値
   explore.p.atk = explore.p.str + g.pAtkBonus;
   explore.p.def = explore.p.vit + g.pDefBonus;
 }
 
 function checkLevelUp() {
-  // 必要経験値: 次のLv * 15 と仮定
   let req = explore.p.lv * 15;
   if (explore.p.exp >= req) {
     explore.p.exp -= req;
     explore.p.lv++;
     recalcPlayerStatsAtLv();
-    explore.p.hp = explore.p.maxHp; // レベルアップ時全回復(原作仕様)
+    explore.p.hp = explore.p.maxHp;
     pushLog('ev', `★ レベルが ${explore.p.lv} に上がった！ HPが全回復した。`);
     checkLevelUp();
   }
@@ -713,10 +586,8 @@ function runOneTurn() {
   
   const dg = MASTER_DUNGEONS.find(d => d.id === explore.dungeonId);
   
-  // 一定確率でイベント: 泉 or 魔物遭遇 or 何もなし
   let r = Math.random();
   if (r < 0.15) {
-    // 泉イベント
     let pool = ['HP', 'STR', 'VIT', 'SPD', 'LUK'];
     let type = pool[Math.floor(Math.random() * pool.length)];
     if (type === 'HP') {
@@ -736,21 +607,16 @@ function runOneTurn() {
       pushLog('ev', `輝く泉にコインを投げ入れた。運気が上がる。(LUK+1)`);
     }
   } else if (r < 0.75) {
-    // 魔物遭遇
     let enemyPool = dg.enemies;
-    // 階層が深いほど後半の敵が出やすい簡易ロジック
     let eName = enemyPool[Math.floor(Math.random() * enemyPool.length)];
-    // 特定ダンジョンボス等の判定も本来はここ
     executeCombat(eName);
   } else {
     pushLog('txt', `静かに通路を進んでいく… 周囲に異常はない。`);
   }
   
-  // 生存していれば、確率で次の階層へ
   if (explore.p.hp > 0) {
     if (Math.random() < 0.25) {
       if (explore.floor >= dg.maxFloors) {
-        // ダンジョン踏破クリア！
         pushLog('kill', `🎉 カタストロフ！ ${dg.name} を完全制覇した！`);
         endExplore(true);
         return;
@@ -760,7 +626,6 @@ function runOneTurn() {
       }
     }
   } else {
-    // 死亡帰還
     pushLog('hit-m', `☠ 冒険者は力尽き、意識が遠のいた…(街へ強制送還)`);
     endExplore(false);
     return;
@@ -774,20 +639,17 @@ function executeCombat(eName) {
   const edef = MASTER_ENEMIES[eName];
   if (!edef) return;
   
-  // 霧濃度による魔物強化
-  let mFactor = 1 + (state.mist * 0.15);
   let e = {
     name: eName,
-    hp: Math.floor(edef.hp * mFactor),
-    maxHp: Math.floor(edef.hp * mFactor),
-    atk: Math.floor(edef.atk * mFactor),
-    def: Math.floor(edef.def * mFactor),
+    hp: edef.hp,
+    maxHp: edef.hp,
+    atk: edef.atk,
+    def: edef.def,
     exp: edef.exp
   };
   
   pushLog('txt', `⚔ 凶悪な 【${e.name}】 が目の前に立ちはだかった！`);
   
-  // アビリティ「先制」チェック
   let hasPreempt = false;
   ['weapon', 'shield', 'ring'].forEach(cat => {
     let item = state.inventory.find(it => it.uid === state.equipped[cat]);
@@ -795,21 +657,19 @@ function executeCombat(eName) {
   });
   
   let pSpd = explore.p.spd;
-  let eSpd = 5; // モンスターの仮想速度
+  let eSpd = 5;
   
   let pTurn = true;
-  if (!hasPreempt && eSpd > pSpd) pTurn = false; // 敵が先手
+  if (!hasPreempt && eSpd > pSpd) pTurn = false;
   
   let rounds = 0;
   while (explore.p.hp > 0 && e.hp > 0 && rounds < 30) {
     rounds++;
     if (pTurn) {
-      // プレイヤーの攻撃
       let dmg = explore.p.atk - e.def;
       if (dmg < 0) dmg = 0;
-      dmg += Math.floor(Math.random() * 6); // 0~5のランダム
+      dmg += Math.floor(Math.random() * 6);
       
-      // アビリティ「一撃」や会心
       let isCrit = Math.random() < 0.05;
       ['weapon', 'shield', 'ring'].forEach(cat => {
         let item = state.inventory.find(it => it.uid === state.equipped[cat]);
@@ -820,7 +680,6 @@ function executeCombat(eName) {
       e.hp -= dmg;
       pushLog('hit-p', `${isCrit?'★会心の一撃！ ':''}冒険者の攻撃 ➔ ${e.name} に ${dmg} のダメージ！`);
       
-      // アビリティ「二撃」(20%で連続)
       if (e.hp > 0) {
         let hasDouble = false;
         ['weapon', 'shield', 'ring'].forEach(cat => {
@@ -835,12 +694,10 @@ function executeCombat(eName) {
         }
       }
     } else {
-      // 敵の攻撃
       let dmg = e.atk - explore.p.def;
       if (dmg < 0) dmg = 0;
       dmg += Math.floor(Math.random() * 6);
       
-      // 不屈アビリティのチェック用に食らう前HP保存
       let preHp = explore.p.hp;
       explore.p.hp -= dmg;
       pushLog('hit-m', `◀ ${e.name} の痛烈な一撃 ➔ 冒険者は ${dmg} のダメージを受けた！`);
@@ -861,11 +718,23 @@ function executeCombat(eName) {
   }
   
   if (explore.p.hp > 0 && e.hp <= 0) {
-    // 勝利
     pushLog('kill', `☠ 【${e.name}】 を撃破した！`);
     explore.p.exp += e.exp;
     
-    // ドロップ判定
+    // カバン内の全装備の解析経験値加算（戦闘勝利時）
+    state.inventory.forEach(it => {
+      it.analysisExp = (it.analysisExp || 0) + 1;
+      while (true) {
+        let req = expNeededForNextLv(it.analysisLv);
+        if (it.analysisExp >= req) {
+          it.analysisExp -= req;
+          it.analysisLv++;
+        } else {
+          break;
+        }
+      }
+    });
+    
     if (edef.drops && edef.drops.length > 0) {
       let hasHunter = false;
       ['weapon', 'shield', 'ring'].forEach(cat => {
@@ -873,24 +742,13 @@ function executeCombat(eName) {
         if (item && item.abilities.includes('宝物狩り')) hasHunter = true;
       });
       
-      let dropChance = hasHunter ? 0.60 : 0.35; // 宝物狩りで確率アップ
+      let dropChance = hasHunter ? 0.60 : 0.35;
       if (Math.random() < dropChance) {
         let dropDef = edef.drops[Math.floor(Math.random() * edef.drops.length)];
-        let newItem = createDroppedItem(dropDef.cat, dropDef.id, state.mist);
+        let newItem = createDroppedItem(dropDef.cat, dropDef.id);
         state.inventory.push(newItem);
-        
-        // 図鑑用の解析EXPを加算(入手時に自動)
-        addAnalysisExp(dropDef.cat, dropDef.id, 1);
-        
         pushLog('get', `🎁 【${itemDisplayName(newItem)}】 を拾い、カバンに入れた！`);
       }
-    }
-    
-    // 確率で素材・薬品ドロップ
-    if (Math.random() < 0.25) {
-      let matName = Math.random() < 0.7 ? 'カタクナール' : '組成液';
-      state.materials[matName]++;
-      pushLog('get', `🧪 薬品【${matName}】を回収した。`);
     }
     
     checkLevelUp();
@@ -903,7 +761,6 @@ function endExplore(success) {
   pushLog('sys', success ? "ーーー 探索成功 街へ帰還しました ーーー" : "ーーー 探索失敗 命からがら街へ逃げ帰りました ーーー");
   updateLogScreenView();
   
-  // 街のベース能力表示再計算
   renderStatusScreen();
 }
 
@@ -917,7 +774,7 @@ function retreatExplore() {
 // ===================== UIレンダリングロジック =====================
 function itemDisplayName(item) {
   const def = findEquipDef(item.category, item.defId);
-  return def.name; // ★修正箇所: 常に本名を返す
+  return def.name;
 }
 
 function renderItemCard(item, opts) {
@@ -929,7 +786,7 @@ function renderItemCard(item, opts) {
   div.className = 'item-card' + (isEquipped ? ' equipped' : '') + (item.justEvolved ? ' flash-evolve' : '') + (opts.selected ? ' selected' : '');
   item.justEvolved = false;
   
-  const knownName = true; // ★修正箇所: 常に真とし名前をカラーで出す
+  const knownName = true;
   const nameText = itemDisplayName(item) + (item.plus > 0 ? ` +${item.plus}` : '');
   
   let abilsText = item.abilities.length > 0 ? item.abilities.join(' / ') : '能力なし';
@@ -942,7 +799,7 @@ function renderItemCard(item, opts) {
     </div>
     <div class="ic-right">
       <div>${item.category.toUpperCase()}</div>
-      <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">解析Lv.${getAnalysisLv(item.category, item.defId)}</div>
+      <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">解析Lv.${item.analysisLv}</div>
     </div>
   `;
   return div;
@@ -977,20 +834,6 @@ function renderItemList() {
   });
 }
 
-function renderMaterialGrid() {
-  const container = document.getElementById('gridMaterials');
-  container.innerHTML = '';
-  for (let key in state.materials) {
-    let div = document.createElement('div');
-    div.className = 'mat-card';
-    div.innerHTML = `
-      <div class="mat-name">${key}</div>
-      <div class="mat-count">${state.materials[key]}</div>
-    `;
-    container.appendChild(div);
-  }
-}
-
 // 詳細パネルの表示
 function renderItemDetail(item) {
   const pnl = document.getElementById('pnlItemDetail');
@@ -998,19 +841,16 @@ function renderItemDetail(item) {
   pnl.innerHTML = '';
   
   const def = findEquipDef(item.category, item.defId);
-  const alv = getAnalysisLv(item.category, item.defId);
   const isEquipped = state.equipped[item.category] === item.uid;
   
   let cMult = 1 + (item.corruption * 0.1);
   
-  // パラメータ行組み立て関数
   function row(label, v1, vUp) {
     if (v1 === undefined) v1 = 0;
     if (vUp === undefined) vUp = 0;
     
-    // 解析Lvに応じたマスク
-    let showV1 = alv >= 1 ? Math.floor(v1 * cMult) : '？？';
-    let showVUp = alv >= 2 ? vUp : '？？';
+    let showV1 = item.analysisLv >= 1 ? Math.floor(v1 * cMult) : '？？';
+    let showVUp = item.analysisLv >= 2 ? vUp : '？？';
     
     let sign = vUp >= 0 ? `+${showVUp}` : `${showVUp}`;
     let vUpClass = vUp > 0 ? 'diff-pos' : (vUp < 0 ? 'diff-neg' : '');
@@ -1024,15 +864,14 @@ function renderItemDetail(item) {
     `;
   }
   
-  let nextExp = expNeededForNextLv(alv);
-  let currentExpObj = state.book[item.category][item.defId] || { exp: 0 };
+  let nextExp = expNeededForNextLv(item.analysisLv);
   
   let html = `
     <div class="dp-title-row">
       <div>
         <div class="dp-title">${itemDisplayName(item)}</div>
         <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">
-          解析度: Lv.${alv} (EXP: ${currentExpObj.exp} / ${nextExp})
+          解析度: Lv.${item.analysisLv} (EXP: ${item.analysisExp || 0} / ${nextExp})
         </div>
       </div>
       <span class="dp-cat">${item.category.toUpperCase()}</span>
@@ -1059,23 +898,18 @@ function renderItemDetail(item) {
       <strong>【付加アビリティ】</strong><br>
       ${item.abilities.length > 0 ? item.abilities.map(a => `・${a}`).join('<br>') : 'なし'}<br>
       ${def.type ? `・[固有属性] ${def.type}<br>` : ''}
-      ${def.target ? `・[派生ヒント] 合成進化の兆候あり<br>` : ''}
+      ${def.target ? `・[派生進化の兆候] 盾【${MASTER_SHIELDS[def.target]?.name || def.target}】を所持して強化すると…？<br>` : ''}
     </div>
     
     <div class="dp-actions">
       <button class="btn btn-sm" id="btnEquipAction">${isEquipped ? 'はずす' : '装備する'}</button>
-      <button class="btn btn-sm btn-outline" id="btnEnhanceAction" ${state.materials['カタクナール'] <= 0 ? 'disabled' : ''}>
-        <i class="fa-solid fa-hammer"></i> カタクナール強化 (-1)
-      </button>
-      <button class="btn btn-sm btn-outline btn-danger" id="btnDiscardAction" ${isEquipped ? 'disabled' : ''} style="margin-left:auto;">
-        処分
-      </button>
+      <button class="btn btn-sm btn-outline" id="btnEnhanceAction"><i class="fa-solid fa-hammer"></i> 簡易強化 (+1)</button>
+      <button class="btn btn-sm btn-outline btn-danger" id="btnDiscardAction" ${isEquipped ? 'disabled' : ''} style="margin-left:auto;">処分</button>
     </div>
   `;
   
   pnl.innerHTML = html;
   
-  // イベントバインド
   document.getElementById('btnEquipAction').onclick = () => {
     if (isEquipped) {
       state.equipped[item.category] = null;
@@ -1088,32 +922,23 @@ function renderItemDetail(item) {
   };
   
   document.getElementById('btnEnhanceAction').onclick = () => {
-    if (state.materials['カタクナール'] <= 0) return;
-    state.materials['カタクナール']--;
     item.plus++;
     
-    // 解析EXPを強化でも獲得可能
-    addAnalysisExp(item.category, item.defId, 1);
-    
-    // 派生進化の判定チェック(武器/盾でターゲット先がある場合)
     let evolved = false;
     if (item.category === 'weapon' && def.target && item.plus >= 3) {
-      // 倉庫または装備に「必要盾」があるかチェック
       let hasTargetShield = state.inventory.some(s => s.category === 'shield' && s.defId === def.target);
       if (hasTargetShield) {
-        // 進化！
         let nextKeys = Object.keys(MASTER_WEAPONS);
         let currIdx = nextKeys.indexOf(item.defId);
         if (currIdx !== -1 && nextKeys[currIdx + 1]) {
-          item.defId = nextKeys[currIdx + 1]; // └つきの上位版へ
-          item.plus = 0; // プラス値リセット
+          item.defId = nextKeys[currIdx + 1];
+          item.plus = 0;
           item.justEvolved = true;
           evolved = true;
         }
       }
     }
     
-    renderMaterialGrid();
     renderItemDetail(item);
     renderItemList();
   };
@@ -1128,16 +953,6 @@ function renderItemDetail(item) {
 
 // 街(ステータス)画面更新
 function renderStatusScreen() {
-  let base = calcTownBaseStats();
-  document.getElementById('bStat-hp').innerText = base.hp1;
-  document.getElementById('bStat-str').innerText = base.str1;
-  document.getElementById('bStat-vit').innerText = base.vit1;
-  document.getElementById('bStat-spd').innerText = base.spd1;
-  document.getElementById('bStat-luk').innerText = base.luk1;
-  
-  document.getElementById('lblTownHp').innerText = `HP ${base.hp1} / ${base.hp1}`;
-  document.getElementById('pbTownHp').style.width = '100%';
-  
   ['weapon', 'shield', 'ring'].forEach(cat => {
     let uuid = state.equipped[cat];
     let nameLbl = document.getElementById(`eqName-${cat}`);
@@ -1203,7 +1018,6 @@ function updateLogScreenView() {
     <span>SPD: ${explore.p.spd} / LUK: ${explore.p.luk}</span>
   `;
   
-  // ログテキスト
   const box = document.getElementById('boxLog');
   box.innerHTML = '';
   explore.log.forEach((l, index) => {
@@ -1215,41 +1029,6 @@ function updateLogScreenView() {
   box.scrollTop = box.scrollHeight;
 }
 
-// 図鑑(ブック)画面の更新
-function renderBookScreen() {
-  const container = document.getElementById('lstBook');
-  container.innerHTML = '';
-  
-  let currentCat = document.querySelector('#bookFilterRow .filter-chip.active').dataset.filter;
-  let pool = {};
-  if (currentCat === 'weapon') pool = MASTER_WEAPONS;
-  if (currentCat === 'shield') pool = MASTER_SHIELDS;
-  if (currentCat === 'ring') pool = MASTER_RINGS;
-  
-  for (let id in pool) {
-    let def = pool[id];
-    let alv = getAnalysisLv(currentCat, id);
-    let div = document.createElement('div');
-    div.className = 'item-card';
-    
-    let nextExp = expNeededForNextLv(alv);
-    let currExp = (state.book[currentCat] && state.book[currentCat][id]) ? state.book[currentCat][id].exp : 0;
-    
-    div.innerHTML = `
-      <div class="ic-left">
-        <div class="ic-name">${def.name}</div>
-        <div class="ic-sub" style="color:var(--text-dim); margin-top:2px;">
-          ${alv >= 1 ? `HP+${def.hp1||0} STR+${def.str1||0} VIT+${def.vit1||0}` : '能力値：未解析'}
-        </div>
-      </div>
-      <div class="ic-right">
-        <div style="font-weight:bold; color:var(--accent);">解析Lv.${alv}</div>
-        <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">EXP: ${currExp}/${nextExp}</div>
-      </div>
-    `;
-    container.appendChild(div);
-  }
-}
 
 // ===================== イベント設定・ナビゲーション =====================
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1257,20 +1036,13 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.getElementById('screen-0' + btn.dataset.screen || 'screen-' + btn.dataset.screen).classList.remove('hidden');
-    
-    // 互換性維持
-    let sId = btn.dataset.screen;
-    const targetScreen = document.getElementById('screen-' + sId);
-    if(targetScreen) targetScreen.classList.remove('hidden');
-    
-    if (sId === 'item') { renderItemList(); renderMaterialGrid(); }
-    if (sId === 'status') renderStatusScreen();
-    if (sId === 'dungeon') renderDungeonList();
+    document.getElementById('screen-' + btn.dataset.screen).classList.remove('hidden');
+    if (btn.dataset.screen === 'item') { renderItemList(); }
+    if (btn.dataset.screen === 'status') renderStatusScreen();
+    if (btn.dataset.screen === 'dungeon') renderDungeonList();
   };
 });
 
-// 倉庫フィルタ
 document.querySelectorAll('#itemFilterRow .filter-chip').forEach(chip => {
   chip.onclick = () => {
     document.querySelectorAll('#itemFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
@@ -1280,26 +1052,6 @@ document.querySelectorAll('#itemFilterRow .filter-chip').forEach(chip => {
   };
 });
 
-// 図鑑フィルタ
-document.querySelectorAll('#bookFilterRow .filter-chip').forEach(chip => {
-  chip.onclick = () => {
-    document.querySelectorAll('#bookFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-    renderBookScreen();
-  };
-});
-
-// 霧調整
-document.getElementById('btnMistUp').onclick = () => {
-  state.mist++;
-  document.getElementById('lblMistValue').innerText = state.mist;
-};
-document.getElementById('btnMistDown').onclick = () => {
-  if (state.mist > 0) state.mist--;
-  document.getElementById('lblMistValue').innerText = state.mist;
-};
-
-// はずすボタン(メイン画面直通)
 document.querySelectorAll('.btn-unequip').forEach(btn => {
   btn.onclick = (e) => {
     e.stopPropagation();
@@ -1309,31 +1061,15 @@ document.querySelectorAll('.btn-unequip').forEach(btn => {
   };
 });
 
-// 図鑑モーダル開閉
-document.getElementById('btnBook').onclick = () => {
-  document.getElementById('mdlBook').classList.remove('hidden');
-  renderBookScreen();
-};
-document.getElementById('btnCloseBook').onclick = () => {
-  document.getElementById('mdlBook').classList.add('hidden');
-};
-
 document.getElementById('btnNextStep').onclick = runOneTurn;
 document.getElementById('btnRetreat').onclick = retreatExplore;
 
 // ===================== 初期化 =====================
 function init() {
-  // 初期解析レベルの設定を仕込んでおく
-  state.book['weapon']['w_000'] = { lv: 2, exp: 0 };
-  state.book['shield']['s_000'] = { lv: 2, exp: 0 };
-  state.book['ring']['r_000'] = { lv: 2, exp: 0 };
-
   const startWeapon = createDroppedItem('weapon', 'w_000', 0); // 木の棒
   const startShield = createDroppedItem('shield', 's_000', 0); // なべのふた
   const startRing = createDroppedItem('ring', 'r_000', 0);     // 銅の指輪
-  
-  [startWeapon, startShield, startRing].forEach(it => { it.abilities = []; });
-  
+  [startWeapon, startShield, startRing].forEach(it => { it.abilities = []; it.analysisLv = 1; });
   state.inventory.push(startWeapon, startShield, startRing);
   state.equipped.weapon = startWeapon.uid;
   state.equipped.shield = startShield.uid;
