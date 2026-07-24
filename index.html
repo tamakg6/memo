@@ -2,227 +2,127 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Whipper風 放置RPG v2</title>
+<title>Whipper風 放置RPG</title>
 <style>
   :root {
-    --bg: #14151a;
-    --panel: #1e2027;
-    --panel2: #262833;
-    --panel3: #2e313d;
-    --border: #34363f;
-    --text: #e8e8ec;
-    --text-dim: #9a9ba5;
-    --accent: #7c6df0;
-    --accent-dim: #4a3fa0;
-    --danger: #e0556a;
-    --warn: #d8a73f;
-    --safe: #4caf7c;
-    --gold: #d8b34a;
-    --white: #cfd2da;
-    --blue: #5b8fd8;
-    --yellow: #d8c23f;
-    --red: #d85f5f;
+    --bg:#14151a;--panel:#1e2027;--panel2:#262833;--border:#34363f;
+    --text:#e8e8ec;--text-dim:#9a9ba5;--accent:#7c6df0;--accent-dim:#4a3fa0;
+    --danger:#e0556a;--warn:#d8a73f;--safe:#4caf7c;--gold:#d8b34a;
+    --rarity-white:#cfd2da;--rarity-blue:#5b8fd8;--rarity-yellow:#d8c23f;--rarity-red:#d85f5f;
   }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, "Hiragino Sans", "Yu Gothic", sans-serif;
-    font-size: 14px;
-    padding-bottom: 70px;
-  }
-  .topbar {
-    position: sticky; top: 0; z-index: 10;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
-    padding: 10px 14px;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .topbar .stat { font-size: 12px; color: var(--text-dim); }
-  .topbar .stat b { color: var(--gold); }
-  .icon-btn {
-    background: var(--panel2); border: 1px solid var(--border); border-radius: 8px;
-    width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-    font-size: 16px; cursor: pointer;
-  }
-  .screen { padding: 14px; max-width: 720px; margin: 0 auto; }
-  .hidden { display: none !important; }
-
-  .card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px;
-    margin-bottom: 12px;
-  }
-  .card h3 { margin: 0 0 8px; font-size: 15px; font-weight: 600; }
-  .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-  .muted { color: var(--text-dim); font-size: 12px; }
-
-  button {
-    background: var(--accent-dim);
-    color: var(--text);
-    border: none;
-    border-radius: 8px;
-    padding: 8px 14px;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  button:disabled { opacity: 0.4; cursor: not-allowed; }
-  button.secondary { background: var(--panel2); border: 1px solid var(--border); }
-  button.small { padding: 4px 10px; font-size: 12px; }
-  button.gold { background: linear-gradient(180deg, #d8b34a, #a4801f); color: #1a1300; font-weight: 600; }
-  button.full { width: 100%; }
-
-  .dungeon-list { display: flex; flex-direction: column; gap: 8px; }
-  .dungeon-item {
-    background: var(--panel2); border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px 12px;
-    display: flex; justify-content: space-between; align-items: center;
-    cursor: pointer;
-  }
-  .dungeon-item:active { border-color: var(--accent); }
-  .danger-label { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
-  .danger-safe { background: rgba(76,175,124,0.15); color: var(--safe); }
-  .danger-caution { background: rgba(216,167,63,0.15); color: var(--warn); }
-  .danger-danger { background: rgba(224,85,106,0.15); color: var(--danger); }
-  .danger-suicide { background: rgba(224,85,106,0.3); color: #ff7a8e; }
-
-  .log-entry {
-    background: var(--panel2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 8px 10px; margin-bottom: 6px;
-    font-size: 12.5px; cursor: pointer;
-  }
-  .log-entry:active { border-color: var(--accent); }
-  .log-entry .t { color: var(--text-dim); margin-right: 6px; }
-
-  .tabbar {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--panel); border-top: 1px solid var(--border);
-    display: flex; z-index: 10;
-  }
-  .tabbar button {
-    flex: 1; background: none; border-radius: 0; padding: 10px 4px;
-    font-size: 11px; color: var(--text-dim); display: flex; flex-direction: column; gap: 2px; align-items: center;
-  }
-  .tabbar button.active { color: var(--accent); }
-
-  .item-card {
-    background: var(--panel2); border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer;
-  }
-  .item-card.equipped { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
-  .item-card.selected { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
-  .item-name { font-weight: 600; }
-  .rarity-white { color: var(--white); }
-  .rarity-blue { color: var(--blue); }
-  .rarity-yellow { color: var(--yellow); }
-  .rarity-red { color: var(--red); }
-  .ability-tag {
-    display: inline-block; background: var(--panel); border: 1px solid var(--border);
-    border-radius: 6px; padding: 2px 8px; font-size: 11px; margin: 2px 4px 0 0; color: var(--text-dim);
-  }
-  .ability-tag.rare { color: var(--gold); border-color: var(--gold); }
-  .ability-tag.locked { opacity: 0.5; }
-  .corrupt-badge {
-    display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 10px;
-    background: rgba(216,179,74,0.15); color: var(--gold); margin-left: 6px;
-  }
-
-  .segctrl { display: flex; background: var(--panel2); border-radius: 8px; padding: 3px; gap: 3px; margin-bottom: 10px; }
-  .segctrl button { flex: 1; background: none; border-radius: 6px; padding: 6px; font-size: 12px; color: var(--text-dim); }
-  .segctrl button.active { background: var(--accent-dim); color: var(--text); }
-
-  .chip-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-  .chip {
-    background: var(--panel2); border: 1px solid var(--border); border-radius: 20px;
-    padding: 6px 12px; font-size: 12px; cursor: pointer;
-  }
-  .chip.active { background: var(--accent-dim); border-color: var(--accent); }
-
-  .mat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px,1fr)); gap: 8px; }
-  .mat-card {
-    background: var(--panel2); border: 1px solid var(--border); border-radius: 8px;
-    padding: 8px; text-align: center; cursor: pointer;
-  }
-  .mat-card.selected { border-color: var(--accent); }
-  .mat-card .cnt { font-size: 12px; color: var(--gold); font-weight: 600; }
-
-  .progress-bar-bg { background: var(--panel2); border-radius: 20px; height: 10px; overflow: hidden; }
-  .progress-bar-fill { background: var(--accent); height: 100%; transition: width 0.3s; }
-
-  .enhance-bar-bg { background: var(--panel2); border-radius: 6px; height: 18px; overflow: hidden; position:relative; }
-  .enhance-bar-fill { background: linear-gradient(90deg, var(--accent-dim), var(--accent)); height: 100%; }
-  .enhance-bar-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; }
-
-  .exp-bar-bg { background: var(--panel2); border-radius: 6px; height: 10px; overflow: hidden; }
-  .exp-bar-fill { background: linear-gradient(90deg, #7c6df0, #b8aaff); height: 100%; }
-
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-    display: flex; align-items: flex-end; justify-content: center; z-index: 50;
-  }
-  .modal {
-    background: var(--panel); border: 1px solid var(--border); border-radius: 16px 16px 0 0;
-    padding: 16px; max-width: 720px; width: 100%; max-height: 88vh; overflow-y: auto;
-  }
-  .modal.centered { border-radius: 12px; max-width: 480px; margin-bottom: auto; margin-top: auto; }
-  .stat-table { width: 100%; font-size: 12.5px; border-collapse: collapse; }
-  .stat-table th, .stat-table td { padding: 4px 6px; text-align: right; border-bottom: 1px solid var(--border); }
-  .stat-table th:first-child, .stat-table td:first-child { text-align: left; }
-
-  .flash-evolve { animation: flashGold 1.2s ease; }
-  @keyframes flashGold {
-    0% { box-shadow: 0 0 0 0 rgba(216,179,74,0.8); }
-    100% { box-shadow: 0 0 0 12px rgba(216,179,74,0); }
-  }
-
-  .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px; position: sticky; top:0; background:var(--panel); padding-bottom:6px;}
-  .close-x { font-size: 20px; color: var(--text-dim); cursor: pointer; padding: 4px 8px; }
-
-  .bp-counter { display:inline-flex; align-items:center; gap:4px; background: var(--panel2); border:1px solid var(--gold); border-radius: 20px; padding: 4px 10px; font-size:12px; color: var(--gold); font-weight:600; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;font-size:14px;padding-bottom:70px;}
+  .topbar{position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+  .bp-counter{display:inline-flex;align-items:center;gap:4px;background:var(--panel2);border:1px solid var(--gold);border-radius:20px;padding:4px 10px;font-size:12px;color:var(--gold);font-weight:600;}
+  .screen{padding:14px;max-width:720px;margin:0 auto;}
+  .hidden{display:none!important;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;}
+  .card h3{margin:0 0 8px;font-size:15px;font-weight:600;}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+  .muted{color:var(--text-dim);font-size:12px;}
+  button{background:var(--accent-dim);color:var(--text);border:none;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;}
+  button:disabled{opacity:.4;cursor:not-allowed;}
+  button.secondary{background:var(--panel2);border:1px solid var(--border);}
+  button.small{padding:4px 10px;font-size:12px;}
+  button.gold{background:linear-gradient(180deg,#d8b34a,#a4801f);color:#1a1300;font-weight:600;}
+  button.full{width:100%;}
+  .dungeon-item{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;margin-bottom:8px;}
+  .dungeon-item:active{border-color:var(--accent);}
+  .danger-label{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;}
+  .danger-safe{background:rgba(76,175,124,.15);color:var(--safe);}
+  .danger-caution{background:rgba(216,167,63,.15);color:var(--warn);}
+  .danger-danger{background:rgba(224,85,106,.15);color:var(--danger);}
+  .danger-suicide{background:rgba(224,85,106,.3);color:#ff7a8e;}
+  .log-entry{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:12.5px;cursor:pointer;}
+  .log-entry:active{border-color:var(--accent);}
+  .log-entry .t{color:var(--text-dim);margin-right:6px;}
+  .tabbar{position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--border);display:flex;z-index:10;}
+  .tabbar button{flex:1;background:none;border-radius:0;padding:10px 4px;font-size:11px;color:var(--text-dim);display:flex;flex-direction:column;gap:2px;align-items:center;}
+  .tabbar button.active{color:var(--accent);}
+  .item-card{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;}
+  .item-card.equipped{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;}
+  .item-card.selected{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset;}
+  .item-name{font-weight:600;}
+  .rarity-white{color:var(--rarity-white);}
+  .rarity-blue{color:var(--rarity-blue);}
+  .rarity-yellow{color:var(--rarity-yellow);}
+  .rarity-red{color:var(--rarity-red);}
+  .ability-tag{display:inline-block;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:11px;margin:2px 4px 0 0;color:var(--text-dim);}
+  .ability-tag.rare{color:var(--gold);border-color:var(--gold);}
+  .corrupt-badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:10px;background:rgba(216,179,74,.15);color:var(--gold);margin-left:4px;}
+  .segctrl{display:flex;background:var(--panel2);border-radius:8px;padding:3px;gap:3px;margin-bottom:10px;}
+  .segctrl button{flex:1;background:none;border-radius:6px;padding:6px;font-size:12px;color:var(--text-dim);}
+  .segctrl button.active{background:var(--accent-dim);color:var(--text);}
+  .mat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;}
+  .mat-card{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;}
+  .mat-card .cnt{font-size:12px;color:var(--gold);font-weight:600;}
+  .progress-bar-bg{background:var(--panel2);border-radius:20px;height:10px;overflow:hidden;}
+  .progress-bar-fill{background:var(--accent);height:100%;transition:width .3s;}
+  .enhance-bar-bg{background:var(--panel2);border-radius:6px;height:18px;overflow:hidden;position:relative;}
+  .enhance-bar-fill{background:linear-gradient(90deg,var(--accent-dim),var(--accent));height:100%;}
+  .enhance-bar-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;}
+  .exp-bar-bg{background:var(--panel2);border-radius:6px;height:10px;overflow:hidden;}
+  .exp-bar-fill{background:linear-gradient(90deg,#7c6df0,#b8aaff);height:100%;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50;}
+  .modal{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;max-width:480px;width:90%;max-height:88vh;overflow-y:auto;}
+  .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;position:sticky;top:0;background:var(--panel);padding-bottom:6px;z-index:2;}
+  .close-x{font-size:20px;color:var(--text-dim);cursor:pointer;padding:4px 8px;}
+  .stat-table{width:100%;font-size:12.5px;border-collapse:collapse;}
+  .stat-table th,.stat-table td{padding:4px 6px;text-align:right;border-bottom:1px solid var(--border);}
+  .stat-table th:first-child,.stat-table td:first-child{text-align:left;}
+  .return-time{font-size:13px;color:var(--gold);font-weight:600;margin:4px 0 8px;}
+  select,input[type=text],input[type=number]{background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:12.5px;width:100%;}
+  #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#7c6df0;color:#fff;padding:8px 16px;border-radius:20px;z-index:100;font-size:13px;pointer-events:none;opacity:0;transition:opacity .4s;}
 </style>
 </head>
 <body>
-
 <div class="topbar">
   <div>
-    <div style="font-weight:600;">冒険者</div>
+    <div style="font-weight:600;">冒険者 Lv <span id="topLevel">1</span></div>
     <span class="bp-counter">BP <span id="topBP">0</span></span>
   </div>
-  <div style="text-align:right; display:flex; align-items:center; gap:8px;">
-    <div>
-      <div class="stat">強さレーティング</div>
-      <div style="font-weight:600; color: var(--gold);" id="topRating">0</div>
-    </div>
+  <div style="text-align:right;">
+    <div class="muted">HP <span id="topHP">35</span>/<span id="topMaxHP">35</span></div>
   </div>
 </div>
 
 <div class="screen" id="screen-dungeon">
-  <div class="card">
-    <h3>ダンジョンを選択</h3>
-    <div class="dungeon-list" id="dungeonList"></div>
-  </div>
+  <div id="worldLevelArea"></div>
   <div class="card hidden" id="explorePanel">
     <h3 id="exploreDungeonName"></h3>
-    <div class="progress-bar-bg" style="margin-bottom:8px;">
+    <div class="progress-bar-bg" style="margin-bottom:6px;">
       <div class="progress-bar-fill" id="exploreProgress" style="width:0%;"></div>
     </div>
-    <div class="row" style="margin-bottom:8px;">
+    <div class="row" style="margin-bottom:2px;">
       <span class="muted" id="exploreStatus">準備中</span>
       <span class="muted" id="exploreFloor"></span>
     </div>
-    <div class="row">
-      <button class="secondary small" id="btnRetreat">途中帰還</button>
-      <button class="small" id="btnNextStep">次のターンへ進む</button>
+    <div class="return-time" id="exploreReturnTime"></div>
+    <button class="secondary small" id="btnRetreat">途中帰還</button>
+    <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:8px;">
+      <div class="muted" style="font-size:11px;margin-bottom:6px;">探索ログ（最新）</div>
+      <div id="currentExploreLog" style="font-size:12px; white-space: pre-wrap;"></div>
     </div>
+  </div>
+  
+  <div class="card" id="randomDungeonCard" style="display:none;">
+    <h3>異世界生成</h3>
+    <p class="muted">キーワードを入力してダンジョンを生成します</p>
+    <div class="row">
+      <input type="text" id="keywordInput" placeholder="キーワード (例: WONDERLAND)" />
+      <button id="btnGenerateDungeon">生成</button>
+    </div>
+  </div>
+
+  <div class="card" id="dungeonListCard">
+    <h3>ダンジョンを選択</h3>
+    <div id="dungeonList"></div>
   </div>
 </div>
 
 <div class="screen hidden" id="screen-log">
   <div class="card">
-    <h3>探索の記録（直近10件）</h3>
+    <h3>探索の記録</h3>
     <div id="logList"></div>
   </div>
 </div>
@@ -231,7 +131,7 @@
   <div class="card">
     <div class="row" style="margin-bottom:10px;">
       <h3 style="margin:0;">所持装備</h3>
-      <div class="icon-btn" id="btnOpenAnalysis" title="解析">📖</div>
+      <button class="small gold" id="btnOpenAnalysis" style="display:none;">📖アイテム図鑑</button>
     </div>
     <div class="segctrl" id="itemCategoryTabs">
       <button class="active" data-cat="weapon">武器</button>
@@ -240,30 +140,48 @@
     </div>
     <div id="itemList"></div>
   </div>
-  <div class="card">
-    <h3>強化素材</h3>
-    <div class="mat-grid" id="materialGrid"></div>
-  </div>
 </div>
 
 <div class="screen hidden" id="screen-status">
   <div class="card">
-    <h3>つよさ</h3>
-    <table class="stat-table" id="statusTable"></table>
-  </div>
-  <div class="card">
-    <h3>現在の装備</h3>
-    <div id="equippedList"></div>
-  </div>
-  <div class="card">
-    <div class="row">
-      <h3 style="margin:0;">永続ブースト（BP）</h3>
-      <span class="bp-counter">BP <span id="bpAvailable">0</span></span>
+    <div class="segctrl" id="statusTabs">
+      <button class="active" data-tab="stat-main">ステータス</button>
+      <button data-tab="stat-boost">永続ブースト</button>
+      <button data-tab="stat-record">冒険記録</button>
     </div>
-    <p class="muted">装備の解析Lvが5の倍数に達するとBPを1獲得。ステータスへの永続加算、または特殊能力の永久固定化（50BP）に使えます。</p>
-    <div id="permanentBoostList"></div>
-    <hr style="border-color: var(--border); margin: 12px 0;">
-    <div id="rareAbilityUnlockList"></div>
+  </div>
+  
+  <div id="tab-stat-main">
+    <div class="card">
+      <h3>現在の装備の成長値</h3>
+      <div id="equippedGrowthList" class="muted" style="font-size:12px;"></div>
+    </div>
+    <div class="card">
+      <h3>合計ステータス予測 (Lv1〜50)</h3>
+      <table class="stat-table" id="statusProjectionTable">
+        <thead>
+          <tr>
+            <th>Lv</th><th>HP</th><th>STR</th><th>VIT</th><th>SPD</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="tab-stat-boost" style="display:none;">
+    <div class="card">
+      <h3>永続ブースト状況</h3>
+      <p class="muted">ステータスへの加算状況です。BPの振り分けは「アイテム図鑑」から行えます。</p>
+      <div id="permanentBoostList"></div>
+    </div>
+  </div>
+
+  <div id="tab-stat-record" style="display:none;">
+    <div class="card">
+      <h3>冒険記録</h3>
+      <div id="adventureRecords" class="muted"></div>
+    </div>
   </div>
 </div>
 
@@ -275,2484 +193,576 @@
 </div>
 
 <div id="modalRoot"></div>
+<div id="toast"></div>
 
 <script id="game-data" type="application/json">
 {
-  "baseStats": {
-    "hp": 35,
-    "str": 10,
-    "vit": 10,
-    "spd": 1,
-    "luk": 1
-  },
-  "growthStats": {
-    "hp": 10,
-    "str": 1,
-    "vit": 1,
-    "spd": 1,
-    "luk": 0
-  },
+  "baseStats": { "hp": 35, "str": 10, "vit": 10, "spd": 1, "luk": 1 },
+  "growthStats": { "hp": 10, "str": 1, "vit": 1, "spd": 1, "luk": 0 },
   "dungeons": [
-    {
-      "id": 1,
-      "name": "はじめの草むら",
-      "floors": 10,
-      "enemyAtkBase": 8,
-      "enemyDefBase": 5
-    },
-    {
-      "id": 2,
-      "name": "迷いの森",
-      "floors": 12,
-      "enemyAtkBase": 18,
-      "enemyDefBase": 12
-    },
-    {
-      "id": 3,
-      "name": "深い洞穴",
-      "floors": 14,
-      "enemyAtkBase": 35,
-      "enemyDefBase": 25
-    },
-    {
-      "id": 4,
-      "name": "黄昏の洋館",
-      "floors": 16,
-      "enemyAtkBase": 55,
-      "enemyDefBase": 38
-    },
-    {
-      "id": 5,
-      "name": "秘密の抜け道",
-      "floors": 18,
-      "enemyAtkBase": 90,
-      "enemyDefBase": 60
-    },
-    {
-      "id": 6,
-      "name": "濃霧の古戦場",
-      "floors": 20,
-      "enemyAtkBase": 140,
-      "enemyDefBase": 95
-    },
-    {
-      "id": 7,
-      "name": "正義の巨塔",
-      "floors": 24,
-      "enemyAtkBase": 220,
-      "enemyDefBase": 150
-    },
-    {
-      "id": 8,
-      "name": "異世界への扉",
-      "floors": 24,
-      "enemyAtkBase": 340,
-      "enemyDefBase": 230
-    },
-    {
-      "id": 9,
-      "name": "次元の裂け目",
-      "floors": 28,
-      "enemyAtkBase": 520,
-      "enemyDefBase": 350
-    },
-    {
-      "id": 10,
-      "name": "終わりの魔城",
-      "floors": 20,
-      "enemyAtkBase": 800,
-      "enemyDefBase": 500
-    }
+    { "id": 1, "name": "はじめの草むら", "floors": 5, "minPerFloor": 5 },
+    { "id": 2, "name": "迷いの森", "floors": 10, "minPerFloor": 10 },
+    { "id": 3, "name": "深い洞穴", "floors": 10, "minPerFloor": 20 },
+    { "id": 4, "name": "黄昏の洋館", "floors": 4, "minPerFloor": 30 },
+    { "id": 5, "name": "秘密の抜け道", "floors": 15, "minPerFloor": 15 },
+    { "id": 6, "name": "濃霧の古戦場", "floors": 6, "minPerFloor": 20 },
+    { "id": 7, "name": "正義の巨塔", "floors": 30, "minPerFloor": 20 },
+    { "id": 8, "name": "異世界への扉", "floors": 1, "minPerFloor": 10 },
+    { "id": 9, "name": "次元の裂け目", "floors": 9, "minPerFloor": 20 },
+    { "id": 10, "name": "終わりの魔城", "floors": 20, "minPerFloor": 21 }
   ],
   "weapons": [
-    {
-      "id": "w_000",
-      "name": "木の棒",
-      "atk": 5,
-      "finalAtk": 310,
-      "enhanceCap": 360,
-      "dungeon": 1,
-      "evolvesTo": "w_001"
-    },
-    {
-      "id": "w_001",
-      "name": "こん棒",
-      "atk": 15,
-      "finalAtk": 470,
-      "enhanceCap": 350,
-      "dungeon": 1,
-      "evolvesTo": "w_002"
-    },
-    {
-      "id": "w_002",
-      "name": "木の剣",
-      "atk": 30,
-      "finalAtk": 470,
-      "enhanceCap": 335,
-      "dungeon": 2,
-      "evolvesTo": "w_003"
-    },
-    {
-      "id": "w_003",
-      "name": "霊木の剣",
-      "atk": 120,
-      "finalAtk": 470,
-      "enhanceCap": 280,
-      "dungeon": 3,
-      "evolvesTo": "w_004"
-    },
-    {
-      "id": "w_004",
-      "name": "ユグドラシル",
-      "atk": 260,
-      "finalAtk": 470,
-      "enhanceCap": 210,
-      "dungeon": 4,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_005",
-      "name": "ショートソード",
-      "atk": 20,
-      "finalAtk": 512,
-      "enhanceCap": 391,
-      "dungeon": 1,
-      "evolvesTo": "w_006"
-    },
-    {
-      "id": "w_006",
-      "name": "ロングソード",
-      "atk": 30,
-      "finalAtk": 512,
-      "enhanceCap": 376,
-      "dungeon": 2,
-      "evolvesTo": "w_007"
-    },
-    {
-      "id": "w_007",
-      "name": "グレートソード",
-      "atk": 55,
-      "finalAtk": 512,
-      "enhanceCap": 356,
-      "dungeon": 3,
-      "evolvesTo": "w_008"
-    },
-    {
-      "id": "w_008",
-      "name": "ドラゴンキラー",
-      "atk": 140,
-      "finalAtk": 512,
-      "enhanceCap": 306,
-      "dungeon": 4,
-      "evolvesTo": "w_009"
-    },
-    {
-      "id": "w_009",
-      "name": "タワー",
-      "atk": 256,
-      "finalAtk": 512,
-      "enhanceCap": 256,
-      "dungeon": 5,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_010",
-      "name": "ワスプナイフ",
-      "atk": 40,
-      "finalAtk": 50,
-      "enhanceCap": 10,
-      "dungeon": 1,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_011",
-      "name": "スタンナックル",
-      "atk": 45,
-      "finalAtk": 60,
-      "enhanceCap": 15,
-      "dungeon": 1,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_012",
-      "name": "鉄塊",
-      "atk": 50,
-      "finalAtk": 290,
-      "enhanceCap": 200,
-      "dungeon": 2,
-      "evolvesTo": "w_013"
-    },
-    {
-      "id": "w_013",
-      "name": "大鉄塊",
-      "atk": 60,
-      "finalAtk": 290,
-      "enhanceCap": 170,
-      "dungeon": 3,
-      "evolvesTo": "w_014"
-    },
-    {
-      "id": "w_014",
-      "name": "極大鉄塊",
-      "atk": 170,
-      "finalAtk": 290,
-      "enhanceCap": 120,
-      "dungeon": 4,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_015",
-      "name": "バトルサイス",
-      "atk": 55,
-      "finalAtk": 75,
-      "enhanceCap": 20,
-      "dungeon": 2,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_016",
-      "name": "タツマキ",
-      "atk": 45,
-      "finalAtk": 80,
-      "enhanceCap": 60,
-      "dungeon": 2,
-      "evolvesTo": "w_017"
-    },
-    {
-      "id": "w_017",
-      "name": "オオタツマキ",
-      "atk": 50,
-      "finalAtk": 80,
-      "enhanceCap": 30,
-      "dungeon": 3,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_018",
-      "name": "フェアリーソード",
-      "atk": 35,
-      "finalAtk": 75,
-      "enhanceCap": 40,
-      "dungeon": 2,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_019",
-      "name": "ピンポイント",
-      "atk": 25,
-      "finalAtk": 75,
-      "enhanceCap": 50,
-      "dungeon": 2,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_020",
-      "name": "装飾刀",
-      "atk": 65,
-      "finalAtk": 68,
-      "enhanceCap": 3,
-      "dungeon": 3,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_021",
-      "name": "エメラルドソード",
-      "atk": 60,
-      "finalAtk": 80,
-      "enhanceCap": 20,
-      "dungeon": 3,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_022",
-      "name": "サラマンダー",
-      "atk": 55,
-      "finalAtk": 490,
-      "enhanceCap": 410,
-      "dungeon": 3,
-      "evolvesTo": "w_023"
-    },
-    {
-      "id": "w_023",
-      "name": "ウンディーネ",
-      "atk": 57,
-      "finalAtk": 490,
-      "enhanceCap": 390,
-      "dungeon": 3,
-      "evolvesTo": "w_024"
-    },
-    {
-      "id": "w_024",
-      "name": "シルフ",
-      "atk": 58,
-      "finalAtk": 490,
-      "enhanceCap": 365,
-      "dungeon": 4,
-      "evolvesTo": "w_025"
-    },
-    {
-      "id": "w_025",
-      "name": "ノーム",
-      "atk": 59,
-      "finalAtk": 490,
-      "enhanceCap": 335,
-      "dungeon": 4,
-      "evolvesTo": "w_026"
-    },
-    {
-      "id": "w_026",
-      "name": "エレメンタリー",
-      "atk": 190,
-      "finalAtk": 490,
-      "enhanceCap": 300,
-      "dungeon": 5,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_027",
-      "name": "幻影剣",
-      "atk": 70,
-      "finalAtk": 190,
-      "enhanceCap": 110,
-      "dungeon": 4,
-      "evolvesTo": "w_028"
-    },
-    {
-      "id": "w_028",
-      "name": "夢想剣",
-      "atk": 120,
-      "finalAtk": 190,
-      "enhanceCap": 70,
-      "dungeon": 5,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_029",
-      "name": "ピースメーカー",
-      "atk": 55,
-      "finalAtk": 669,
-      "enhanceCap": 346,
-      "dungeon": 4,
-      "evolvesTo": "w_030"
-    },
-    {
-      "id": "w_030",
-      "name": "デイドリーム",
-      "atk": 70,
-      "finalAtk": 669,
-      "enhanceCap": 339,
-      "dungeon": 4,
-      "evolvesTo": "w_031"
-    },
-    {
-      "id": "w_031",
-      "name": "カリオストロ",
-      "atk": 100,
-      "finalAtk": 669,
-      "enhanceCap": 319,
-      "dungeon": 5,
-      "evolvesTo": "w_032"
-    },
-    {
-      "id": "w_032",
-      "name": "グラナダ",
-      "atk": 200,
-      "finalAtk": 669,
-      "enhanceCap": 269,
-      "dungeon": 5,
-      "evolvesTo": "w_033"
-    },
-    {
-      "id": "w_033",
-      "name": "パンゲア",
-      "atk": 570,
-      "finalAtk": 669,
-      "enhanceCap": 99,
-      "dungeon": 6,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_034",
-      "name": "ファントム",
-      "atk": 80,
-      "finalAtk": 110,
-      "enhanceCap": 30,
-      "dungeon": 4,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_035",
-      "name": "キリサメ",
-      "atk": 80,
-      "finalAtk": 379,
-      "enhanceCap": 290,
-      "dungeon": 4,
-      "evolvesTo": "w_036"
-    },
-    {
-      "id": "w_036",
-      "name": "クロキリサメ",
-      "atk": 85,
-      "finalAtk": 379,
-      "enhanceCap": 246,
-      "dungeon": 4,
-      "evolvesTo": "w_037"
-    },
-    {
-      "id": "w_037",
-      "name": "アカキリサメ",
-      "atk": 199,
-      "finalAtk": 379,
-      "enhanceCap": 180,
-      "dungeon": 5,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_038",
-      "name": "ハンドアクス",
-      "atk": 54,
-      "finalAtk": 520,
-      "enhanceCap": 255,
-      "dungeon": 4,
-      "evolvesTo": "w_039"
-    },
-    {
-      "id": "w_039",
-      "name": "クレセント",
-      "atk": 100,
-      "finalAtk": 520,
-      "enhanceCap": 240,
-      "dungeon": 4,
-      "evolvesTo": "w_040"
-    },
-    {
-      "id": "w_040",
-      "name": "ボルケイノ",
-      "atk": 250,
-      "finalAtk": 520,
-      "enhanceCap": 200,
-      "dungeon": 5,
-      "evolvesTo": "w_041"
-    },
-    {
-      "id": "w_041",
-      "name": "イラプション",
-      "atk": 420,
-      "finalAtk": 520,
-      "enhanceCap": 100,
-      "dungeon": 5,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_042",
-      "name": "サンダーウィップ",
-      "atk": 120,
-      "finalAtk": 140,
-      "enhanceCap": 20,
-      "dungeon": 5,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_043",
-      "name": "くない",
-      "atk": 60,
-      "finalAtk": 360,
-      "enhanceCap": 225,
-      "dungeon": 4,
-      "evolvesTo": "w_044"
-    },
-    {
-      "id": "w_044",
-      "name": "十字手裏剣",
-      "atk": 72,
-      "finalAtk": 360,
-      "enhanceCap": 210,
-      "dungeon": 4,
-      "evolvesTo": "w_045"
-    },
-    {
-      "id": "w_045",
-      "name": "風車",
-      "atk": 80,
-      "finalAtk": 360,
-      "enhanceCap": 190,
-      "dungeon": 5,
-      "evolvesTo": "w_046"
-    },
-    {
-      "id": "w_046",
-      "name": "火車",
-      "atk": 210,
-      "finalAtk": 360,
-      "enhanceCap": 150,
-      "dungeon": 5,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_047",
-      "name": "サーペント",
-      "atk": 150,
-      "finalAtk": 427,
-      "enhanceCap": 272,
-      "dungeon": 5,
-      "evolvesTo": "w_048"
-    },
-    {
-      "id": "w_048",
-      "name": "クラーケン",
-      "atk": 220,
-      "finalAtk": 427,
-      "enhanceCap": 237,
-      "dungeon": 5,
-      "evolvesTo": "w_049"
-    },
-    {
-      "id": "w_049",
-      "name": "ホワイトスネイク",
-      "atk": 350,
-      "finalAtk": 427,
-      "enhanceCap": 77,
-      "dungeon": 6,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_050",
-      "name": "アルカード",
-      "atk": 160,
-      "finalAtk": 310,
-      "enhanceCap": 280,
-      "dungeon": 5,
-      "evolvesTo": "w_051"
-    },
-    {
-      "id": "w_051",
-      "name": "プログレス",
-      "atk": 60,
-      "finalAtk": 310,
-      "enhanceCap": 250,
-      "dungeon": 6,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_052",
-      "name": "死に神の鎌",
-      "atk": 200,
-      "finalAtk": 210,
-      "enhanceCap": 10,
-      "dungeon": 6,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_053",
-      "name": "妖刀時雨",
-      "atk": 1120,
-      "finalAtk": 121,
-      "enhanceCap": 120,
-      "dungeon": 6,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_054",
-      "name": "ダンシング",
-      "atk": 350,
-      "finalAtk": 470,
-      "enhanceCap": 120,
-      "dungeon": 5,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_055",
-      "name": "パルスナイフ",
-      "atk": 350,
-      "finalAtk": 598,
-      "enhanceCap": 256,
-      "dungeon": 5,
-      "evolvesTo": "w_056"
-    },
-    {
-      "id": "w_056",
-      "name": "インパルス",
-      "atk": 470,
-      "finalAtk": 598,
-      "enhanceCap": 128,
-      "dungeon": 6,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_057",
-      "name": "錆びた包丁",
-      "atk": 105,
-      "finalAtk": 600,
-      "enhanceCap": 350,
-      "dungeon": 5,
-      "evolvesTo": "w_058"
-    },
-    {
-      "id": "w_058",
-      "name": "柳刃",
-      "atk": 500,
-      "finalAtk": 600,
-      "enhanceCap": 300,
-      "dungeon": 5,
-      "evolvesTo": "w_059"
-    },
-    {
-      "id": "w_059",
-      "name": "薄刃",
-      "atk": 400,
-      "finalAtk": 600,
-      "enhanceCap": 200,
-      "dungeon": 6,
-      "evolvesTo": "w_060"
-    },
-    {
-      "id": "w_060",
-      "name": "三徳",
-      "atk": 480,
-      "finalAtk": 600,
-      "enhanceCap": 100,
-      "dungeon": 6,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_061",
-      "name": "ルビーナックル",
-      "atk": 300,
-      "finalAtk": 620,
-      "enhanceCap": 270,
-      "dungeon": 5,
-      "evolvesTo": "w_062"
-    },
-    {
-      "id": "w_062",
-      "name": "ダイヤナックル",
-      "atk": 356,
-      "finalAtk": 620,
-      "enhanceCap": 220,
-      "dungeon": 5,
-      "evolvesTo": "w_063"
-    },
-    {
-      "id": "w_063",
-      "name": "ムーンナックル",
-      "atk": 500,
-      "finalAtk": 620,
-      "enhanceCap": 120,
-      "dungeon": 6,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_064",
-      "name": "ツラヌキ",
-      "atk": 600,
-      "finalAtk": 640,
-      "enhanceCap": 40,
-      "dungeon": 6,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_065",
-      "name": "グランドスラム",
-      "atk": 699,
-      "finalAtk": 700,
-      "enhanceCap": 1,
-      "dungeon": 7,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_066",
-      "name": "グラディウス",
-      "atk": 560,
-      "finalAtk": 750,
-      "enhanceCap": 190,
-      "dungeon": 7,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_067",
-      "name": "クラスターボム",
-      "atk": 600,
-      "finalAtk": 999,
-      "enhanceCap": 1099,
-      "dungeon": 7,
-      "evolvesTo": "w_068"
-    },
-    {
-      "id": "w_068",
-      "name": "ビッグバン",
-      "atk": 999,
-      "finalAtk": 999,
-      "enhanceCap": 999,
-      "dungeon": 8,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_069",
-      "name": "ジャックナイフ",
-      "atk": 450,
-      "finalAtk": 580,
-      "enhanceCap": 130,
-      "dungeon": 7,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_070",
-      "name": "正義の槌",
-      "atk": 650,
-      "finalAtk": 850,
-      "enhanceCap": 200,
-      "dungeon": 7,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_071",
-      "name": "ポータルソード",
-      "atk": 800,
-      "finalAtk": 980,
-      "enhanceCap": 180,
-      "dungeon": 8,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_072",
-      "name": "ドロイドハンマー",
-      "atk": 1100,
-      "finalAtk": 1320,
-      "enhanceCap": 220,
-      "dungeon": 8,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_073",
-      "name": "イカヅチ",
-      "atk": 770,
-      "finalAtk": 1120,
-      "enhanceCap": 350,
-      "dungeon": 8,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_074",
-      "name": "ゴッドハンド",
-      "atk": 900,
-      "finalAtk": 1100,
-      "enhanceCap": 200,
-      "dungeon": 9,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_075",
-      "name": "蒼の剣",
-      "atk": 500,
-      "finalAtk": 800,
-      "enhanceCap": 300,
-      "dungeon": 7,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_076",
-      "name": "神竜刀",
-      "atk": 600,
-      "finalAtk": 610,
-      "enhanceCap": 10,
-      "dungeon": 9,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_077",
-      "name": "回帰の槍",
-      "atk": 104,
-      "finalAtk": 420,
-      "enhanceCap": 410,
-      "dungeon": 9,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_078",
-      "name": "スターゲイザー",
-      "atk": 800,
-      "finalAtk": 1400,
-      "enhanceCap": 600,
-      "dungeon": 9,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_079",
-      "name": "ゾディアックス",
-      "atk": 1400,
-      "finalAtk": 1410,
-      "enhanceCap": 10,
-      "dungeon": 9,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_080",
-      "name": "てっけん",
-      "atk": 999,
-      "finalAtk": 1400,
-      "enhanceCap": 401,
-      "dungeon": 9,
-      "evolvesTo": null
-    },
-    {
-      "id": "w_081",
-      "name": "悪霊の剣",
-      "atk": 2000,
-      "finalAtk": 2500,
-      "enhanceCap": 500,
-      "dungeon": 10,
-      "evolvesTo": null
-    }
+    { "id": "w_001", "name": "木の棒", "type": "打撃", "atk": 0, "lv1": {"hp":0,"str":0,"vit":0,"spd":0,"luk":0}, "lvup": {"hp":0,"str":0,"vit":0,"spd":0,"luk":0} }
   ],
   "shields": [
-    {
-      "id": "s_000",
-      "name": "なべのふた",
-      "def": 5,
-      "finalDef": 200,
-      "enhanceCap": 360,
-      "dungeon": 1,
-      "evolvesTo": "s_001"
-    },
-    {
-      "id": "s_001",
-      "name": "木の盾",
-      "def": 15,
-      "finalDef": 280,
-      "enhanceCap": 340,
-      "dungeon": 1,
-      "evolvesTo": "s_002"
-    },
-    {
-      "id": "s_002",
-      "name": "革の盾",
-      "def": 30,
-      "finalDef": 320,
-      "enhanceCap": 300,
-      "dungeon": 2,
-      "evolvesTo": "s_003"
-    },
-    {
-      "id": "s_003",
-      "name": "鉄甲の盾",
-      "def": 80,
-      "finalDef": 360,
-      "enhanceCap": 240,
-      "dungeon": 3,
-      "evolvesTo": "s_004"
-    },
-    {
-      "id": "s_004",
-      "name": "竜鱗の盾",
-      "def": 200,
-      "finalDef": 380,
-      "enhanceCap": 180,
-      "dungeon": 5,
-      "evolvesTo": null
-    },
-    {
-      "id": "s_005",
-      "name": "堅木の盾",
-      "def": 20,
-      "finalDef": 70,
-      "enhanceCap": 50,
-      "dungeon": 2,
-      "evolvesTo": null
-    },
-    {
-      "id": "s_006",
-      "name": "合成獣の翼",
-      "def": 40,
-      "finalDef": 160,
-      "enhanceCap": 120,
-      "dungeon": 3,
-      "evolvesTo": "s_007"
-    },
-    {
-      "id": "s_007",
-      "name": "合成獣の堅翼",
-      "def": 120,
-      "finalDef": 270,
-      "enhanceCap": 150,
-      "dungeon": 3,
-      "evolvesTo": null
-    },
-    {
-      "id": "s_008",
-      "name": "スライムシールド",
-      "def": 128,
-      "finalDef": 338,
-      "enhanceCap": 210,
-      "dungeon": 3,
-      "evolvesTo": "s_009"
-    },
-    {
-      "id": "s_009",
-      "name": "スラフィールド",
-      "def": 210,
-      "finalDef": 300,
-      "enhanceCap": 90,
-      "dungeon": 4,
-      "evolvesTo": null
-    },
-    {
-      "id": "s_010",
-      "name": "黒刀息吹",
-      "def": 250,
-      "finalDef": 310,
-      "enhanceCap": 60,
-      "dungeon": 6,
-      "evolvesTo": null
-    },
-    {
-      "id": "s_011",
-      "name": "オーロラシールド",
-      "def": 70,
-      "finalDef": 940,
-      "enhanceCap": 870,
-      "dungeon": 8,
-      "evolvesTo": null
-    },
-    {
-      "id": "s_012",
-      "name": "正義の盾",
-      "def": 400,
-      "finalDef": 480,
-      "enhanceCap": 80,
-      "dungeon": 7,
-      "evolvesTo": "s_013"
-    },
-    {
-      "id": "s_013",
-      "name": "神盾",
-      "def": 700,
-      "finalDef": 760,
-      "enhanceCap": 60,
-      "dungeon": 8,
-      "evolvesTo": null
-    },
-    {
-      "id": "s_014",
-      "name": "次元の盾",
-      "def": 1000,
-      "finalDef": 1050,
-      "enhanceCap": 50,
-      "dungeon": 9,
-      "evolvesTo": null
-    },
-    {
-      "id": "s_015",
-      "name": "魔王の鎧",
-      "def": 1500,
-      "finalDef": 1540,
-      "enhanceCap": 40,
-      "dungeon": 10,
-      "evolvesTo": null
-    },
-    {
-      "id": "s_016",
-      "name": "ポータルシールド",
-      "def": 800,
-      "finalDef": 980,
-      "enhanceCap": 180,
-      "dungeon": 8,
-      "evolvesTo": null
-    }
+    { "id": "s_001", "name": "なべのふた", "def": 0, "lv1": {"hp":0,"str":0,"vit":0,"spd":0,"luk":0}, "lvup": {"hp":0,"str":0,"vit":0,"spd":0,"luk":0} }
   ],
   "rings": [
-    {
-      "id": "r_000",
-      "name": "銅の指輪",
-      "dungeon": 1
-    },
-    {
-      "id": "r_001",
-      "name": "葉っぱの指輪",
-      "dungeon": 1
-    },
-    {
-      "id": "r_002",
-      "name": "銀の指輪",
-      "dungeon": 2
-    },
-    {
-      "id": "r_003",
-      "name": "フェアリーリング",
-      "dungeon": 2
-    },
-    {
-      "id": "r_004",
-      "name": "石の指輪",
-      "dungeon": 3
-    },
-    {
-      "id": "r_005",
-      "name": "コウモリの指輪",
-      "dungeon": 3
-    },
-    {
-      "id": "r_006",
-      "name": "金の指輪",
-      "dungeon": 4
-    },
-    {
-      "id": "r_007",
-      "name": "幽霊の指輪",
-      "dungeon": 4
-    },
-    {
-      "id": "r_008",
-      "name": "ラピッドラビット",
-      "dungeon": 5
-    },
-    {
-      "id": "r_009",
-      "name": "力の指輪",
-      "dungeon": 5
-    },
-    {
-      "id": "r_010",
-      "name": "オブシダンリング",
-      "dungeon": 6
-    },
-    {
-      "id": "r_011",
-      "name": "戦士の指輪",
-      "dungeon": 6
-    },
-    {
-      "id": "r_012",
-      "name": "正義の指輪",
-      "dungeon": 7
-    },
-    {
-      "id": "r_013",
-      "name": "ヴォイドリング",
-      "dungeon": 8
-    },
-    {
-      "id": "r_014",
-      "name": "次元の指輪",
-      "dungeon": 9
-    },
-    {
-      "id": "r_015",
-      "name": "覇王の指輪",
-      "dungeon": 10
-    }
+    { "id": "r_001", "name": "銅の指輪", "lv1": {"hp":0,"str":0,"vit":0,"spd":0,"luk":0}, "lvup": {"hp":0,"str":0,"vit":0,"spd":0,"luk":0} }
   ],
-  "enhanceMaterials": [
-    {
-      "id": "m_katakunaru",
-      "name": "カタクナール",
-      "value": 1
-    },
-    {
-      "id": "m_katakunaru_x",
-      "name": "カタクナールX",
-      "value": 3
-    },
-    {
-      "id": "m_katakunaru_z",
-      "name": "カタクナールZ",
-      "value": 5
-    },
-    {
-      "id": "m_katakunaru_g",
-      "name": "カタクナールG",
-      "value": 10
-    },
-    {
-      "id": "m_katakunaru_xg",
-      "name": "カタクナールXG",
-      "value": 30
-    },
-    {
-      "id": "m_katakunaru_zg",
-      "name": "カタクナールZG",
-      "value": 50
-    }
+  "monsters": [
+    { "dungeon": 1, "name": "スライム", "hp": 20, "atk": 5, "def": 2, "spd": 1, "exp": 10, "dropRate": 0.5 },
+    { "dungeon": 2, "name": "ゴブリン", "hp": 50, "atk": 15, "def": 10, "spd": 2, "exp": 25, "dropRate": 0.5 },
+    { "dungeon": 3, "name": "コウモリ", "hp": 80, "atk": 30, "def": 20, "spd": 5, "exp": 50, "dropRate": 0.5 },
+    { "dungeon": 4, "name": "ゴースト", "hp": 150, "atk": 50, "def": 30, "spd": 4, "exp": 100, "dropRate": 0.5 },
+    { "dungeon": 5, "name": "ラピッドラビット", "hp": 200, "atk": 70, "def": 50, "spd": 20, "exp": 200, "dropRate": 0.5 },
+    { "dungeon": 6, "name": "スケルトン", "hp": 300, "atk": 100, "def": 80, "spd": 10, "exp": 400, "dropRate": 0.5 },
+    { "dungeon": 7, "name": "ガーディアン", "hp": 800, "atk": 200, "def": 150, "spd": 15, "exp": 800, "dropRate": 0.5 },
+    { "dungeon": 8, "name": "アリス", "hp": 2000, "atk": 400, "def": 300, "spd": 40, "exp": 2000, "dropRate": 1.0 },
+    { "dungeon": 9, "name": "ワンダーマッド", "hp": 3000, "atk": 600, "def": 500, "spd": 50, "exp": 4000, "dropRate": 0.5 },
+    { "dungeon": 10, "name": "魔王", "hp": 10000, "atk": 1500, "def": 1000, "spd": 80, "exp": 10000, "dropRate": 1.0 }
   ],
-  "abilityPool": [
-    "耐久",
-    "腕力",
-    "頑丈",
-    "機敏",
-    "幸運",
-    "体力の鍛錬",
-    "力の鍛錬",
-    "守りの鍛錬"
-  ],
-  "rareAbilities": [
-    "一撃",
-    "二撃",
-    "先制"
-  ],
-  "breakthroughLines": [
-    {
-      "analysisLv": 5,
-      "corruption": 0,
-      "effect": "強化上限アップ +100"
-    },
-    {
-      "analysisLv": 6,
-      "corruption": 50,
-      "effect": "特定ステータスブースト ×1.1"
-    },
-    {
-      "analysisLv": 7,
-      "corruption": 100,
-      "effect": "強化上限アップ +1000"
-    },
-    {
-      "analysisLv": 8,
-      "corruption": 150,
-      "effect": "強化ブースト ×2"
-    },
-    {
-      "analysisLv": 9,
-      "corruption": 200,
-      "effect": "セット装備：STRブースト ×1.5（特定装備と組み合わせ）/ 盾は守備力ブースト ×1.3"
-    },
-    {
-      "analysisLv": 10,
-      "corruption": 250,
-      "effect": "侵食度ブースト ×2（侵食度反映が×10→×20になる）"
-    },
-    {
-      "analysisLv": 11,
-      "corruption": 300,
-      "effect": "強化上限アップ +2000"
-    },
-    {
-      "analysisLv": 12,
-      "corruption": 350,
-      "effect": "強化ブースト ×2"
-    },
-    {
-      "analysisLv": 13,
-      "corruption": 400,
-      "effect": "HPブースト ×1.3"
-    },
-    {
-      "analysisLv": 14,
-      "corruption": 450,
-      "effect": "強化上限アップ +3000"
-    },
-    {
-      "analysisLv": 15,
-      "corruption": 500,
-      "effect": "侵食度ブースト ×2"
-    }
-  ],
-  "permanentBoostOptions": [
-    {
-      "key": "hp",
-      "label": "HP",
-      "perPoint": 5
-    },
-    {
-      "key": "atk",
-      "label": "ATK",
-      "perPoint": 3
-    },
-    {
-      "key": "def",
-      "label": "DEF",
-      "perPoint": 3
-    },
-    {
-      "key": "spd",
-      "label": "SPD",
-      "perPoint": 1
-    },
-    {
-      "key": "luk",
-      "label": "LUK（ドロップ運）",
-      "perPoint": 1
-    }
-  ],
-  "rareAbilityUnlockCost": 50,
-  "enemies": [
-    {
-      "dungeon": 1,
-      "name": "グラスファング",
-      "kind": "雑魚",
-      "atk": 8,
-      "def": 5,
-      "hp": 48,
-      "spd": 3
-    },
-    {
-      "dungeon": 1,
-      "name": "リトルスライム",
-      "kind": "雑魚",
-      "atk": 10,
-      "def": 6,
-      "hp": 62,
-      "spd": 3
-    },
-    {
-      "dungeon": 1,
-      "name": "草むらの王",
-      "kind": "ボス",
-      "atk": 28,
-      "def": 18,
-      "hp": 169,
-      "spd": 3
-    },
-    {
-      "dungeon": 2,
-      "name": "フェアリー",
-      "kind": "雑魚",
-      "atk": 18,
-      "def": 12,
-      "hp": 108,
-      "spd": 4
-    },
-    {
-      "dungeon": 2,
-      "name": "森狼",
-      "kind": "雑魚",
-      "atk": 23,
-      "def": 16,
-      "hp": 140,
-      "spd": 4
-    },
-    {
-      "dungeon": 2,
-      "name": "ストレイシープ",
-      "kind": "ボス",
-      "atk": 63,
-      "def": 42,
-      "hp": 380,
-      "spd": 4
-    },
-    {
-      "dungeon": 3,
-      "name": "コウモリ",
-      "kind": "雑魚",
-      "atk": 35,
-      "def": 25,
-      "hp": 210,
-      "spd": 5
-    },
-    {
-      "dungeon": 3,
-      "name": "ドラゴンベビー",
-      "kind": "雑魚",
-      "atk": 46,
-      "def": 32,
-      "hp": 273,
-      "spd": 5
-    },
-    {
-      "dungeon": 3,
-      "name": "洞穴の主",
-      "kind": "ボス",
-      "atk": 123,
-      "def": 88,
-      "hp": 739,
-      "spd": 5
-    },
-    {
-      "dungeon": 4,
-      "name": "デスマシーン1",
-      "kind": "雑魚",
-      "atk": 55,
-      "def": 38,
-      "hp": 330,
-      "spd": 6
-    },
-    {
-      "dungeon": 4,
-      "name": "亡霊",
-      "kind": "雑魚",
-      "atk": 72,
-      "def": 49,
-      "hp": 429,
-      "spd": 6
-    },
-    {
-      "dungeon": 4,
-      "name": "洋館の支配者",
-      "kind": "ボス",
-      "atk": 194,
-      "def": 134,
-      "hp": 1162,
-      "spd": 6
-    },
-    {
-      "dungeon": 5,
-      "name": "ゴーレム",
-      "kind": "雑魚",
-      "atk": 90,
-      "def": 60,
-      "hp": 540,
-      "spd": 7
-    },
-    {
-      "dungeon": 5,
-      "name": "エメラルドゴーレム",
-      "kind": "雑魚",
-      "atk": 117,
-      "def": 78,
-      "hp": 702,
-      "spd": 7
-    },
-    {
-      "dungeon": 5,
-      "name": "抜け道の番人",
-      "kind": "ボス",
-      "atk": 317,
-      "def": 211,
-      "hp": 1901,
-      "spd": 7
-    },
-    {
-      "dungeon": 6,
-      "name": "古戦士",
-      "kind": "雑魚",
-      "atk": 140,
-      "def": 95,
-      "hp": 840,
-      "spd": 8
-    },
-    {
-      "dungeon": 6,
-      "name": "パーフェクトキメラ",
-      "kind": "雑魚",
-      "atk": 182,
-      "def": 124,
-      "hp": 1092,
-      "spd": 8
-    },
-    {
-      "dungeon": 6,
-      "name": "古戦場の将軍",
-      "kind": "ボス",
-      "atk": 493,
-      "def": 334,
-      "hp": 2957,
-      "spd": 8
-    },
-    {
-      "dungeon": 7,
-      "name": "セイントドラゴン",
-      "kind": "雑魚",
-      "atk": 220,
-      "def": 150,
-      "hp": 1320,
-      "spd": 9
-    },
-    {
-      "dungeon": 7,
-      "name": "死に神",
-      "kind": "雑魚",
-      "atk": 286,
-      "def": 195,
-      "hp": 1716,
-      "spd": 9
-    },
-    {
-      "dungeon": 7,
-      "name": "巨塔の番人",
-      "kind": "ボス",
-      "atk": 774,
-      "def": 528,
-      "hp": 4646,
-      "spd": 9
-    },
-    {
-      "dungeon": 8,
-      "name": "異形の闇",
-      "kind": "雑魚",
-      "atk": 340,
-      "def": 230,
-      "hp": 2040,
-      "spd": 10
-    },
-    {
-      "dungeon": 8,
-      "name": "次元の番人",
-      "kind": "雑魚",
-      "atk": 442,
-      "def": 299,
-      "hp": 2652,
-      "spd": 10
-    },
-    {
-      "dungeon": 8,
-      "name": "扉の支配者",
-      "kind": "ボス",
-      "atk": 1197,
-      "def": 810,
-      "hp": 7181,
-      "spd": 10
-    },
-    {
-      "dungeon": 9,
-      "name": "裂け目の怪物",
-      "kind": "雑魚",
-      "atk": 520,
-      "def": 350,
-      "hp": 3120,
-      "spd": 11
-    },
-    {
-      "dungeon": 9,
-      "name": "時空の歪み",
-      "kind": "雑魚",
-      "atk": 676,
-      "def": 455,
-      "hp": 4056,
-      "spd": 11
-    },
-    {
-      "dungeon": 9,
-      "name": "次元の王",
-      "kind": "ボス",
-      "atk": 1830,
-      "def": 1232,
-      "hp": 10982,
-      "spd": 11
-    },
-    {
-      "dungeon": 10,
-      "name": "魔獣",
-      "kind": "雑魚",
-      "atk": 800,
-      "def": 500,
-      "hp": 4800,
-      "spd": 12
-    },
-    {
-      "dungeon": 10,
-      "name": "テバ",
-      "kind": "雑魚",
-      "atk": 1040,
-      "def": 650,
-      "hp": 6240,
-      "spd": 12
-    },
-    {
-      "dungeon": 10,
-      "name": "魔王",
-      "kind": "ボス",
-      "atk": 2816,
-      "def": 1760,
-      "hp": 16896,
-      "spd": 12
-    }
-  ],
-  "corruptionMultiplierAfterLv10": 2
+  "abilityPool": ["HP強化", "腕力強化", "頑丈", "俊敏", "会心", "吸血", "毒付与", "経験値増"]
 }
 </script>
+
 <script>
-// ===================== データロード =====================
 const GAME_DATA = JSON.parse(document.getElementById('game-data').textContent);
 
-function findWeapon(id) { return GAME_DATA.weapons.find(w => w.id === id); }
-function findShield(id) { return GAME_DATA.shields.find(s => s.id === id); }
-function findRing(id) { return GAME_DATA.rings.find(r => r.id === id); }
-function findEquipDef(category, id) {
-  if (category === 'weapon') return findWeapon(id);
-  if (category === 'shield') return findShield(id);
-  return findRing(id);
-}
-function categoryLabel(cat) { return cat === 'weapon' ? '武器' : cat === 'shield' ? '盾' : '指輪'; }
-
-// ===================== ダメージ計算 =====================
-function calcDamage(atk, def) { return Math.max(1, Math.round(atk - def)); }
-
-// ===================== レアリティ =====================
-function rarityOf(corruption) {
-  if (corruption >= 250) return { key: 'red', label: '赤', cls: 'rarity-red', expGain: 8 };
-  if (corruption >= 150) return { key: 'yellow', label: '黄', cls: 'rarity-yellow', expGain: 4 };
-  if (corruption >= 50) return { key: 'blue', label: '青', cls: 'rarity-blue', expGain: 2 };
-  return { key: 'white', label: '白', cls: 'rarity-white', expGain: 1 };
-}
-
-// ===================== 侵食度ドロップ =====================
-// 瘴気度0（1周目）では侵食度付きアイテムは一切ドロップしない。
-// 瘴気度1以上で初めて侵食度がつくようになる。
-function rollCorruption(worldLevel) {
-  if (worldLevel <= 0) return 0;
-  const r = Math.random();
-  const bias = Math.min(0.6, worldLevel * 0.08);
-  const adjusted = Math.pow(r, 1 - bias);
-  return Math.round(adjusted * 300);
-}
-
-// ===================== 解析Lv・EXP =====================
-// 要望4: 解析のレベルアップに必要なexpを1,2,4,8,16…化する関数
-function expNeededForNextLv(targetLv) {
-  return Math.pow(2, Math.max(0, targetLv - 2)); 
-}
-
-// ===================== 限界突破 =====================
-function getBreakthroughLines() { return GAME_DATA.breakthroughLines; }
-function activeEffectsFor(analysisLv, corruption) {
-  return getBreakthroughLines().filter(l => analysisLv >= l.analysisLv && corruption >= l.corruption);
-}
-// 侵食度ブースト倍率（解析Lv10未満は×10、Lv10以上は×20）。本家の正確な仕様。
-function corruptionAtkBonus(item) {
-  if (item.category === 'ring') return 0;
-  const multiplier = item.analysisLv >= 10 ? 20 : 10;
-  return item.corruption * multiplier;
-}
-
-// ===================== ゲームステートとセーブ機能 =====================
-let uidCounter = 1;
-const state = {
-  worldLevel: 0, // 瘴気度。0=1周目（侵食度なし）。全ダンジョンクリアで+1される周回要素。
-  bp: 0,
-  permanentBoosts: { hp: 0, atk: 0, def: 0, spd: 0, luk: 0 },
-  rareAbilityUnlocked: { "一撃": false, "二撃": false, "先制": false },
-  materials: {},
+let player = {
+  level: 1, exp: 0,
+  bp: 0, 
+  allocatedBP: { hp: 0, str: 0, vit: 0, spd: 0 },
   inventory: [],
   equipped: { weapon: null, shield: null, ring: null },
-  currentDungeon: null,
-  exploreState: null,
-  analysisSelection: { target: null, material: null },
-  clearedDungeons: {}, // dungeonId -> true（今周でクリア済み）
+  flags: { unlockedItemGuide: false, hasWhiteKey: false, unlockedWonderland: false, maxDungeonCleared: 0 },
+  exploring: null,
+  analysisData: {},
+  logs: []
 };
 
-// 要望2: LocalStorageへの保存・読み込み
-const SAVE_KEY = 'whipper_rpg_save_v2';
+// Generate unique ID for items
+function uid() { return Math.random().toString(36).substr(2, 9); }
 
-function saveState() {
-  const saveData = {
-    state: state,
-    globalLog: globalLog,
-    currentItemFilter: currentItemFilter
-  };
-  localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+// Initialize game
+function init() {
+  const saved = localStorage.getItem('whipper_save');
+  if(saved) {
+    player = JSON.parse(saved);
+  } else {
+    // Initial equipment
+    const w = { uid: uid(), baseId: "w_001", abilities: [], type: "weapon" };
+    const s = { uid: uid(), baseId: "s_001", abilities: [], type: "shield" };
+    const r = { uid: uid(), baseId: "r_001", abilities: [], type: "ring" };
+    player.inventory.push(w, s, r);
+    player.equipped.weapon = w.uid;
+    player.equipped.shield = s.uid;
+    player.equipped.ring = r.uid;
+    save();
+  }
+  
+  setupUI();
+  updateTopBar();
+  setInterval(gameLoop, 1000);
 }
 
-function loadState() {
-  const saved = localStorage.getItem(SAVE_KEY);
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved);
-      Object.assign(state, parsed.state);
-      if (parsed.globalLog) {
-        globalLog = parsed.globalLog.map(log => {
-          log.time = new Date(log.time);
-          return log;
-        });
-      }
-      if (parsed.currentItemFilter && parsed.currentItemFilter !== 'all') {
-        currentItemFilter = parsed.currentItemFilter;
-      }
-      if (state.exploreState && state.exploreState.log) {
-        state.exploreState.log.forEach(log => log.time = new Date(log.time));
-      }
-      return true;
-    } catch (e) {
-      console.error("Save data parsing error", e);
+function save() {
+  localStorage.setItem('whipper_save', JSON.stringify(player));
+}
+
+// Get actual stats
+function getPlayerStats(level = player.level) {
+  let hp = GAME_DATA.baseStats.hp + player.allocatedBP.hp + (level - 1) * GAME_DATA.growthStats.hp;
+  let str = GAME_DATA.baseStats.str + player.allocatedBP.str + (level - 1) * GAME_DATA.growthStats.str;
+  let vit = GAME_DATA.baseStats.vit + player.allocatedBP.vit + (level - 1) * GAME_DATA.growthStats.vit;
+  let spd = GAME_DATA.baseStats.spd + player.allocatedBP.spd + (level - 1) * GAME_DATA.growthStats.spd;
+  let luk = GAME_DATA.baseStats.luk;
+
+  const equips = [
+    player.inventory.find(i => i.uid === player.equipped.weapon),
+    player.inventory.find(i => i.uid === player.equipped.shield),
+    player.inventory.find(i => i.uid === player.equipped.ring)
+  ].filter(Boolean);
+
+  let atk = 0; let def = 0;
+
+  equips.forEach(eq => {
+    let baseItem;
+    if(eq.type === 'weapon') { baseItem = GAME_DATA.weapons.find(w=>w.id===eq.baseId); atk += baseItem.atk; }
+    if(eq.type === 'shield') { baseItem = GAME_DATA.shields.find(s=>s.id===eq.baseId); def += baseItem.def; }
+    if(eq.type === 'ring') { baseItem = GAME_DATA.rings.find(r=>r.id===eq.baseId); }
+    
+    if(baseItem) {
+      hp += (baseItem.lv1.hp || 0) + (level - 1) * (baseItem.lvup.hp || 0);
+      str += (baseItem.lv1.str || 0) + (level - 1) * (baseItem.lvup.str || 0);
+      vit += (baseItem.lv1.vit || 0) + (level - 1) * (baseItem.lvup.vit || 0);
+      spd += (baseItem.lv1.spd || 0) + (level - 1) * (baseItem.lvup.spd || 0);
+      luk += (baseItem.lv1.luk || 0) + (level - 1) * (baseItem.lvup.luk || 0);
     }
-  }
-  return false;
-}
-
-function isDungeonUnlocked(dungeonId) {
-  const sortedIds = GAME_DATA.dungeons.map(d => d.id).sort((a, b) => a - b);
-  const idx = sortedIds.indexOf(dungeonId);
-  if (idx <= 0) return true;
-  const prevId = sortedIds[idx - 1];
-  return !!state.clearedDungeons[prevId];
-}
-
-function allDungeonsCleared() {
-  return GAME_DATA.dungeons.every(d => state.clearedDungeons[d.id]);
-}
-
-function addMaterial(id, count) { state.materials[id] = (state.materials[id] || 0) + count; }
-
-function rollAbilities(corruption) {
-  const slots = 3;
-  const abilities = [];
-  const canRare = corruption >= 150; // 黄色以上のみレア能力対象
-  const usedRare = canRare && Math.random() < 0.12;
-  for (let i = 0; i < slots; i++) {
-    if (usedRare && i === 0) {
-      const name = GAME_DATA.rareAbilities[Math.floor(Math.random() * GAME_DATA.rareAbilities.length)];
-      abilities.push({ name, lv: 1, rare: true });
-    } else {
-      const name = GAME_DATA.abilityPool[Math.floor(Math.random() * GAME_DATA.abilityPool.length)];
-      abilities.push({ name, lv: 1 + Math.floor(Math.random() * 8) });
-    }
-  }
-  return abilities;
-}
-
-function createDroppedItem(category, defId, corruption) {
-  return {
-    uid: 'item' + (uidCounter++),
-    category,
-    defId,
-    enhanceLv: 0,
-    corruption,
-    abilities: rollAbilities(corruption),
-    analysisLv: 0,
-    analysisExp: 0,
-    bpAwardedAt: 0,
-    justEvolved: false,
-  };
-}
-
-// ===================== 強化（武器・盾のみ） =====================
-function enhanceCapFor(item) {
-  const def = findEquipDef(item.category, item.defId);
-  let cap = def.enhanceCap || 0;
-  const effects = activeEffectsFor(item.analysisLv, item.corruption);
-  effects.forEach(e => {
-    const m = e.effect.match(/強化上限アップ\s*\+(\d+)/);
-    if (m) cap += parseInt(m[1], 10);
-  });
-  return cap;
-}
-
-function enhanceItem(uid, materialId, count) {
-  const item = state.inventory.find(it => it.uid === uid);
-  if (!item || item.category === 'ring') return false;
-  const mat = GAME_DATA.enhanceMaterials.find(m => m.id === materialId);
-  const have = state.materials[materialId] || 0;
-  if (have < count || count <= 0) return false;
-  const cap = enhanceCapFor(item);
-  const addAmount = mat.value * count;
-  const newLv = Math.min(cap, item.enhanceLv + addAmount);
-  if (newLv === item.enhanceLv) return false;
-  state.materials[materialId] -= count;
-  item.enhanceLv = newLv;
-  checkEvolution(item);
-  return true;
-}
-
-function checkEvolution(item) {
-  const def = findEquipDef(item.category, item.defId);
-  if (!def || !def.evolvesTo) return false;
-  const cap = enhanceCapFor(item);
-  if (item.enhanceLv >= cap) {
-    const newDef = findEquipDef(item.category, def.evolvesTo);
-    if (newDef) {
-      const carryOverLv = item.enhanceLv - cap; // 超過分は進化先に引き継ぐ（本家Ver2以降仕様）
-      item.defId = def.evolvesTo;
-      item.enhanceLv = Math.max(0, carryOverLv);
-      item.analysisLv = 0;
-      item.analysisExp = 0;
-      item.bpAwardedAt = 0;
-      item.justEvolved = true;
-      return true;
-    }
-  }
-  return false;
-}
-
-// ===================== 解析（exp・Lv・BP付与） =====================
-function gainAnalysisExp(item, expAmount) {
-  item.analysisExp += expAmount;
-  let leveledUp = false;
-  while (true) {
-    const need = expNeededForNextLv(item.analysisLv + 1);
-    if (item.analysisExp >= need) {
-      item.analysisExp -= need;
-      item.analysisLv += 1;
-      leveledUp = true;
-      if (item.analysisLv % 5 === 0 && item.analysisLv > item.bpAwardedAt) {
-        state.bp += 1;
-        item.bpAwardedAt = item.analysisLv;
-      }
-    } else break;
-  }
-  return leveledUp;
-}
-
-// 解析素材として使えるかどうか：同じdefIdのみ、かつ装備中でないこと
-function canUseAsAnalysisMaterial(targetItem, candidateItem) {
-  if (candidateItem.uid === targetItem.uid) return false;
-  if (candidateItem.defId !== targetItem.defId) return false;
-  const isEquipped = Object.values(state.equipped).includes(candidateItem.uid);
-  if (isEquipped) return false;
-  return true;
-}
-
-function analyzeWithMaterial(targetUid, materialUid) {
-  const target = state.inventory.find(it => it.uid === targetUid);
-  const mat = state.inventory.find(it => it.uid === materialUid);
-  if (!target || !mat) return false;
-  if (!canUseAsAnalysisMaterial(target, mat)) return false;
-  const r = rarityOf(mat.corruption);
-  gainAnalysisExp(target, r.expGain);
-  state.inventory = state.inventory.filter(it => it.uid !== mat.uid);
-  return true;
-}
-
-// ===================== 永続ブースト（BP） =====================
-function spendBPOnStat(key) {
-  if (state.bp <= 0) return false;
-  state.bp -= 1;
-  state.permanentBoosts[key] = (state.permanentBoosts[key] || 0) + 1;
-  saveState();
-  return true;
-}
-function unlockRareAbility(name) {
-  const cost = GAME_DATA.rareAbilityUnlockCost;
-  if (state.bp < cost || state.rareAbilityUnlocked[name]) return false;
-  state.bp -= cost;
-  state.rareAbilityUnlocked[name] = true;
-  saveState();
-  return true;
-}
-// リスペック：ステータス系・特殊能力固定化の両方をまとめて全額回収
-function respecAll() {
-  const totalSpentOnStats = Object.values(state.permanentBoosts).reduce((a, b) => a + b, 0);
-  const unlockedRareCount = Object.values(state.rareAbilityUnlocked).filter(Boolean).length;
-  const totalSpentOnRare = unlockedRareCount * GAME_DATA.rareAbilityUnlockCost;
-  const total = totalSpentOnStats + totalSpentOnRare;
-  if (total <= 0) return false;
-  state.bp += total;
-  Object.keys(state.permanentBoosts).forEach(k => state.permanentBoosts[k] = 0);
-  Object.keys(state.rareAbilityUnlocked).forEach(k => state.rareAbilityUnlocked[k] = false);
-  saveState();
-  return true;
-}
-
-// ===================== プレイヤーステータス計算 =====================
-const ABILITY_EFFECT = {
-  "耐久": { stat: "hp", target: "base" },
-  "腕力": { stat: "str", target: "base" },
-  "頑丈": { stat: "vit", target: "base" },
-  "機敏": { stat: "spd", target: "base" },
-  "幸運": { stat: "luk", target: "base" },
-  "体力の鍛錬": { stat: "hp", target: "growth" },
-  "力の鍛錬": { stat: "str", target: "growth" },
-  "守りの鍛錬": { stat: "vit", target: "growth" },
-};
-const ABILITY_BASE_PER_LV = { hp: 20, str: 15, vit: 15, spd: 1, luk: 1 };
-const ABILITY_GROWTH_PER_LV = { hp: 2, str: 0.5, vit: 0.5, spd: 0.2, luk: 0 };
-
-function getEquippedItem(cat) {
-  const uid = state.equipped[cat];
-  return uid ? state.inventory.find(it => it.uid === uid) : null;
-}
-
-function computePlayerStats() {
-  const base = { ...GAME_DATA.baseStats };
-  const growth = { ...GAME_DATA.growthStats };
-  let weaponAtk = 0, shieldDef = 0;
-  let atkBoost = 1, defBoost = 1, hpBoost = 1;
-  let rareFlags = { 一撃: false, 二撃: false, 先制: false };
-
-  GAME_DATA.permanentBoostOptions.forEach(o => {
-    const statKeyMap = { hp: 'hp', atk: 'str', def: 'vit', spd: 'spd', luk: 'luk' };
-    base[statKeyMap[o.key]] += state.permanentBoosts[o.key] * o.perPoint;
   });
 
-  Object.keys(state.rareAbilityUnlocked).forEach(name => {
-    if (state.rareAbilityUnlocked[name]) rareFlags[name] = true;
-  });
-
-  ['weapon', 'shield', 'ring'].forEach(cat => {
-    const item = getEquippedItem(cat);
-    if (!item) return;
-    const def = findEquipDef(cat, item.defId);
-    if (cat === 'weapon') weaponAtk = (def.atk || 0) + item.enhanceLv + corruptionAtkBonus(item);
-    if (cat === 'shield') shieldDef = (def.def || 0) + item.enhanceLv + corruptionAtkBonus(item);
-
-    item.abilities.forEach(ab => {
-      if (ab.rare) { rareFlags[ab.name] = true; return; }
-      const eff = ABILITY_EFFECT[ab.name];
-      if (!eff) return;
-      if (eff.target === 'base') base[eff.stat] += ABILITY_BASE_PER_LV[eff.stat] * ab.lv;
-      else growth[eff.stat] += ABILITY_GROWTH_PER_LV[eff.stat] * ab.lv;
-    });
-
-    const effects = activeEffectsFor(item.analysisLv, item.corruption);
-    effects.forEach(e => {
-      if (e.effect.includes('HPブースト')) {
-        const m = e.effect.match(/×([\d.]+)/); if (m) hpBoost *= parseFloat(m[1]);
-      }
-    });
-  });
-
-  const totalAtk = weaponAtk * atkBoost;
-  const totalDef = shieldDef * defBoost;
-  const totalHp = base.hp * hpBoost;
-
-  return { base, growth, weaponAtk, shieldDef, totalAtk, totalDef, totalHp, rareFlags };
+  return { hp, str, vit, spd, luk, atk, def, maxHp: hp };
 }
 
-function computeRating(stats) {
-  return Math.round(stats.totalAtk * 2 + stats.totalDef * 2 + stats.totalHp * 0.5);
+// LUK based abilities
+function generateAbilities(luk) {
+  let count = 0;
+  if(Math.random() < luk * 0.05) count++;
+  if(Math.random() < luk * 0.02) count++;
+  if(Math.random() < luk * 0.005) count++;
+  
+  let abs = [];
+  for(let i=0; i<count; i++) {
+    abs.push(GAME_DATA.abilityPool[Math.floor(Math.random() * GAME_DATA.abilityPool.length)]);
+  }
+  return abs;
 }
 
-// ===================== 危険度ラベル =====================
-function dangerLabelForDungeon(dungeonId) {
-  const stats = computePlayerStats();
-  const playerPower = stats.totalAtk + stats.totalDef + stats.totalHp * 0.3;
-  const d = GAME_DATA.dungeons.find(x => x.id === dungeonId);
-  const bossPower = d.enemyAtkBase * 2.2 * 1.6 + d.enemyDefBase * 2.2 * 1.6 + (d.enemyAtkBase * 2.2 * 1.6 * 6) * 0.3;
-  const ratio = playerPower / bossPower;
-  if (ratio >= 2.0) return { label: '安全', cls: 'danger-safe' };
-  if (ratio >= 1.2) return { label: '注意', cls: 'danger-caution' };
-  if (ratio >= 0.7) return { label: '危険', cls: 'danger-danger' };
-  return { label: '自殺行為', cls: 'danger-suicide' };
-}
-
-// ===================== レンダリング: ダンジョン一覧 =====================
-function renderDungeonList() {
-  const el = document.getElementById('dungeonList');
-  el.innerHTML = '';
-
-  // 瘴気度表示
-  let worldLevelHtml = `<div class="row" style="margin-bottom:10px;">
-    <span>瘴気濃度（周回）: <b style="color:var(--gold)">${state.worldLevel}</b></span>
-    ${allDungeonsCleared() ? `<button class="small gold" id="btnAdvanceWorldLevel">瘴気濃度を上げて再挑戦</button>` : '<span class="muted">全制覇すると上げられます</span>'}
-  </div>`;
-  el.insertAdjacentHTML('beforebegin', '');
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = worldLevelHtml;
-  el.parentElement.insertBefore(wrapper, el);
-  const existingWrapper = document.getElementById('worldLevelWrapper');
-  if (existingWrapper) existingWrapper.remove();
-  wrapper.id = 'worldLevelWrapper';
-  const advanceBtn = document.getElementById('btnAdvanceWorldLevel');
-  if (advanceBtn) {
-    advanceBtn.onclick = () => {
-      state.worldLevel += 1;
-      state.clearedDungeons = {};
-      renderDungeonList();
-      saveState();
-      alert(`瘴気濃度が${state.worldLevel}になった！侵食度の高いアイテムが出やすくなる。`);
+// UI Setup
+function setupUI() {
+  document.querySelectorAll('.tabbar button').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.tabbar button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+      document.getElementById('screen-' + btn.dataset.screen).classList.remove('hidden');
+      refreshCurrentScreen();
     };
+  });
+  
+  document.querySelectorAll('#itemCategoryTabs button').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#itemCategoryTabs button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderItems(btn.dataset.cat);
+    };
+  });
+
+  document.querySelectorAll('#statusTabs button').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#statusTabs button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-stat-main').style.display = 'none';
+      document.getElementById('tab-stat-boost').style.display = 'none';
+      document.getElementById('tab-stat-record').style.display = 'none';
+      document.getElementById(btn.dataset.tab).style.display = 'block';
+    };
+  });
+
+  document.getElementById('btnRetreat').onclick = () => {
+    if(player.exploring) {
+      logMessage(`探索を中断し、帰還しました。`);
+      player.exploring = null;
+      save();
+      refreshCurrentScreen();
+    }
+  };
+
+  document.getElementById('btnOpenAnalysis').onclick = openAnalysisModal;
+
+  document.getElementById('btnGenerateDungeon').onclick = () => {
+    const kw = document.getElementById('keywordInput').value.toUpperCase();
+    if(kw === "WONDERLAND" && player.flags.maxDungeonCleared >= 7) {
+      player.flags.unlockedWonderland = true;
+      showToast("次元の裂け目が出現しました！");
+      save();
+      renderDungeonList();
+    } else {
+      startDungeon(8, kw); // Random dungeon alias
+    }
+  };
+
+  refreshCurrentScreen();
+}
+
+function refreshCurrentScreen() {
+  updateTopBar();
+  const activeTab = document.querySelector('.tabbar .active').dataset.screen;
+  if(activeTab === 'dungeon') renderDungeons();
+  if(activeTab === 'item') {
+    if(player.flags.unlockedItemGuide) document.getElementById('btnOpenAnalysis').style.display = 'inline-block';
+    const cat = document.querySelector('#itemCategoryTabs .active').dataset.cat;
+    renderItems(cat);
+  }
+  if(activeTab === 'status') renderStatus();
+  if(activeTab === 'log') renderLogs();
+}
+
+function updateTopBar() {
+  const st = getPlayerStats();
+  document.getElementById('topLevel').innerText = player.level;
+  document.getElementById('topBP').innerText = player.bp;
+  document.getElementById('topMaxHP').innerText = st.maxHp;
+  document.getElementById('topHP').innerText = player.exploring ? Math.max(0, Math.floor(st.maxHp * (1 - player.exploring.damageTaken))) : st.maxHp;
+}
+
+// Dungeon Logic
+function renderDungeons() {
+  const panel = document.getElementById('explorePanel');
+  const list = document.getElementById('dungeonListCard');
+  
+  if(player.flags.hasWhiteKey) {
+    document.getElementById('randomDungeonCard').style.display = 'block';
   }
 
-  // 解放済みダンジョンのみ表示（未解放はそもそも表示しない）
-  const sortedDungeons = GAME_DATA.dungeons.slice().sort((a, b) => a.id - b.id);
-  sortedDungeons.forEach(d => {
-    if (!isDungeonUnlocked(d.id)) return; // 未解放は表示しない
-    const cleared = !!state.clearedDungeons[d.id];
-    const danger = dangerLabelForDungeon(d.id);
+  if(player.exploring) {
+    panel.classList.remove('hidden');
+    list.classList.add('hidden');
+    
+    document.getElementById('exploreDungeonName').innerText = player.exploring.name;
+    document.getElementById('exploreFloor').innerText = `B${player.exploring.floor}F`;
+    const totalTime = player.exploring.minPerFloor * 60;
+    const elapsed = Math.floor((Date.now() - player.exploring.startTime) / 1000);
+    const progress = Math.min(100, (elapsed / totalTime) * 100);
+    document.getElementById('exploreProgress').style.width = progress + '%';
+    document.getElementById('exploreReturnTime').innerText = `残り約 ${Math.ceil((totalTime - elapsed)/60)} 分`;
+    
+  } else {
+    panel.classList.add('hidden');
+    list.classList.remove('hidden');
+    renderDungeonList();
+  }
+}
+
+function renderDungeonList() {
+  const container = document.getElementById('dungeonList');
+  container.innerHTML = '';
+  
+  GAME_DATA.dungeons.forEach(d => {
+    if(d.id > player.flags.maxDungeonCleared + 1 && d.id !== 8 && d.id !== 9) return;
+    if(d.id === 9 && !player.flags.unlockedWonderland) return;
+
     const div = document.createElement('div');
     div.className = 'dungeon-item';
     div.innerHTML = `
       <div>
-        <div style="font-weight:600;">${d.id}. ${d.name} ${cleared ? '✓' : ''}</div>
-        <div class="muted">全${d.floors}階</div>
+        <div style="font-weight:600;">${d.name}</div>
+        <div class="muted">全${d.floors}階 / 1階あたり約${d.minPerFloor}分</div>
       </div>
-      <span class="danger-label ${danger.cls}">${danger.label}</span>
     `;
-    div.onclick = () => startExplore(d.id);
-    el.appendChild(div);
+    div.onclick = () => startDungeon(d.id);
+    container.appendChild(div);
   });
 }
 
-// ===================== 探索ロジック =====================
-function startExplore(dungeonId) {
-  state.currentDungeon = dungeonId;
-  state.exploreState = { floorIndex: 1, log: [], finished: false };
-  document.getElementById('explorePanel').classList.remove('hidden');
-  document.getElementById('exploreDungeonName').textContent =
-    GAME_DATA.dungeons.find(d => d.id === dungeonId).name;
-  updateExploreUI();
-  saveState();
-}
-
-function getEnemyForFloor(dungeonId, floorIndex, totalFloors) {
-  const pool = GAME_DATA.enemies.filter(e => e.dungeon === dungeonId);
-  const isBossFloor = floorIndex >= totalFloors;
-  const candidates = pool.filter(e => isBossFloor ? e.kind === 'ボス' : e.kind === '雑魚');
-  return candidates[Math.floor(Math.random() * candidates.length)] || pool[0];
-}
-
-let globalLog = [];
-function pushGlobalLog(entry) {
-  globalLog.unshift(entry);
-  if (globalLog.length > 10) globalLog.length = 10;
-}
-
-function enemyStatMultiplier() {
-  // 瘴気濃度による敵強化（緩やかな線形）
-  return 1 + state.worldLevel * 0.6;
-}
-
-function runOneTurn() {
-  const ex = state.exploreState;
-  if (!ex || ex.finished) return;
-  const dungeonId = state.currentDungeon;
-  const dungeonDef = GAME_DATA.dungeons.find(d => d.id === dungeonId);
-  const enemyDef = getEnemyForFloor(dungeonId, ex.floorIndex, dungeonDef.floors);
-  const wlMult = enemyStatMultiplier();
-  const enemy = {
-    name: enemyDef.name,
-    hp: Math.round(enemyDef.hp * wlMult),
-    atk: Math.round(enemyDef.atk * wlMult),
-    def: Math.round(enemyDef.def * wlMult),
-    spd: enemyDef.spd,
+function startDungeon(id, customName = null) {
+  const d = GAME_DATA.dungeons.find(x => x.id === id);
+  player.exploring = {
+    id: id,
+    name: customName ? `異世界: ${customName}` : d.name,
+    floor: 1,
+    maxFloor: d.floors,
+    minPerFloor: d.minPerFloor,
+    startTime: Date.now(),
+    damageTaken: 0,
+    log: "ダンジョンに足を踏み入れた。"
   };
-
-  const stats = computePlayerStats();
-  const playerAtk = stats.totalAtk;
-  const playerDef = stats.totalDef;
-  const playerHp = Math.round(stats.totalHp);
-  const playerSpd = stats.base.spd;
-
-  const turnLog = { time: new Date(), enemyName: enemy.name, dungeonName: dungeonDef.name, floor: ex.floorIndex, actions: [], result: null, drops: [] };
-  let curEnemyHp = enemy.hp;
-  let curPlayerHp = playerHp;
-  const playerFirst = stats.rareFlags['先制'] || playerSpd >= enemy.spd;
-
-  function playerAttack() {
-    let dmg = calcDamage(playerAtk, enemy.def);
-    if (stats.rareFlags['一撃']) dmg *= 2;
-    curEnemyHp -= dmg;
-    turnLog.actions.push({ side: 'player', dmg, crit: stats.rareFlags['一撃'], targetHpLeft: Math.max(0, curEnemyHp) });
-    if (stats.rareFlags['二撃'] && curEnemyHp > 0) {
-      let dmg2 = calcDamage(playerAtk, enemy.def);
-      if (stats.rareFlags['一撃']) dmg2 *= 2;
-      curEnemyHp -= dmg2;
-      turnLog.actions.push({ side: 'player', dmg: dmg2, crit: stats.rareFlags['一撃'], targetHpLeft: Math.max(0, curEnemyHp), second: true });
-    }
-  }
-  function enemyAttack() {
-    const dmg = calcDamage(enemy.atk, playerDef);
-    curPlayerHp -= dmg;
-    turnLog.actions.push({ side: 'enemy', dmg, targetHpLeft: Math.max(0, curPlayerHp) });
-  }
-
-  let rounds = 0;
-  while (curEnemyHp > 0 && curPlayerHp > 0 && rounds < 50) {
-    if (playerFirst) { playerAttack(); if (curEnemyHp <= 0) break; enemyAttack(); }
-    else { enemyAttack(); if (curPlayerHp <= 0) break; playerAttack(); }
-    rounds++;
-  }
-
-  if (curPlayerHp <= 0) {
-    turnLog.result = 'dead';
-    ex.finished = true;
-    ex.dead = true;
-  } else {
-    turnLog.result = 'win';
-    rollDrop(dungeonId, turnLog);
-    ex.floorIndex++;
-    if (ex.floorIndex > dungeonDef.floors) {
-      ex.finished = true;
-      ex.dungeonCleared = true;
-      state.clearedDungeons[dungeonId] = true;
-    }
-  }
-
-  ex.log.unshift(turnLog);
-  pushGlobalLog(turnLog);
-  updateExploreUI();
-  saveState();
+  save();
+  refreshCurrentScreen();
 }
 
-function rollDrop(dungeonId, turnLog) {
-  const roll = Math.random();
-  if (roll < 0.3) {
-    const pool = GAME_DATA.weapons.filter(w => w.dungeon === dungeonId);
-    if (pool.length) {
-      const def = pool[Math.floor(Math.random() * pool.length)];
-      const corruption = rollCorruption(state.worldLevel);
-      state.inventory.push(createDroppedItem('weapon', def.id, corruption));
-      turnLog.drops.push({ name: def.name, category: 'weapon', corruption });
-    }
-  } else if (roll < 0.55) {
-    const pool = GAME_DATA.shields.filter(s => s.dungeon === dungeonId);
-    if (pool.length) {
-      const def = pool[Math.floor(Math.random() * pool.length)];
-      const corruption = rollCorruption(state.worldLevel);
-      state.inventory.push(createDroppedItem('shield', def.id, corruption));
-      turnLog.drops.push({ name: def.name, category: 'shield', corruption });
-    }
-  } else if (roll < 0.75) {
-    const pool = GAME_DATA.rings.filter(r => r.dungeon === dungeonId);
-    if (pool.length) {
-      const def = pool[Math.floor(Math.random() * pool.length)];
-      const corruption = rollCorruption(state.worldLevel);
-      state.inventory.push(createDroppedItem('ring', def.id, corruption));
-      turnLog.drops.push({ name: def.name, category: 'ring', corruption });
-    }
-  } else {
-    const mat = GAME_DATA.enhanceMaterials[Math.floor(Math.random() * 3)];
-    const count = 1 + Math.floor(Math.random() * 3);
-    addMaterial(mat.id, count);
-    turnLog.drops.push({ name: mat.name + ' ×' + count, category: 'material' });
-  }
-}
-
-function retreatExplore() {
-  if (!state.exploreState) return;
-  state.exploreState.finished = true;
-  state.exploreState.retreated = true;
-  updateExploreUI();
-  saveState();
-}
-
-function updateExploreUI() {
-  const ex = state.exploreState;
-  if (!ex) return;
-  const dungeonDef = GAME_DATA.dungeons.find(d => d.id === state.currentDungeon);
-  const progress = Math.min(100, (ex.floorIndex / dungeonDef.floors) * 100);
-  document.getElementById('exploreProgress').style.width = progress + '%';
-  document.getElementById('exploreFloor').textContent = `${Math.min(ex.floorIndex, dungeonDef.floors)}/${dungeonDef.floors}階`;
-
-  let statusText = `${ex.floorIndex}階を探索中`;
-  if (ex.dead) statusText = '全滅...探索中の成果をすべて失った';
-  else if (ex.retreated) statusText = '途中帰還した（ここまでの成果を持って帰還）';
-  else if (ex.dungeonCleared) statusText = '最深部のボスを撃破！次のダンジョンが解放された';
-  else if (ex.finished) statusText = '最深部に到達！帰還した';
-  document.getElementById('exploreStatus').textContent = statusText;
-
-  document.getElementById('btnNextStep').disabled = ex.finished;
-  document.getElementById('btnRetreat').disabled = ex.finished;
-  if (ex.dungeonCleared) renderDungeonList();
-
-  renderTopBar();
-}
-
-function renderLogList() {
-  const el = document.getElementById('logList');
-  el.innerHTML = '';
-  if (globalLog.length === 0) { el.innerHTML = '<p class="muted">まだ記録がありません。</p>'; return; }
-  globalLog.forEach((entry) => {
-    const div = document.createElement('div');
-    div.className = 'log-entry';
-    const timeStr = entry.time.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-    let summary = entry.result === 'dead' ? `${entry.enemyName}にやられた` : `${entry.enemyName}を倒した`;
-    div.innerHTML = `<span class="t">${timeStr}</span>${entry.dungeonName} ${entry.floor}階 ${summary}`;
-    div.onclick = () => showLogDetail(entry);
-    el.appendChild(div);
-  });
-}
-
-function showLogDetail(entry) {
-  const modal = document.getElementById('modalRoot');
-  let actionsHtml = entry.actions.map(a => {
-    if (a.side === 'player') {
-      const tag = a.crit ? '会心の一撃！' : (a.second ? '二撃目！' : '');
-      return `<div class="log-entry">あなたの攻撃${tag ? '（' + tag + '）' : ''}：${entry.enemyName}に${a.dmg}のダメージ（残り${a.targetHpLeft}）</div>`;
-    }
-    return `<div class="log-entry">${entry.enemyName}の反撃：あなたに${a.dmg}のダメージ（残り${a.targetHpLeft}）</div>`;
-  }).join('');
-  let dropsHtml = entry.drops.length
-    ? entry.drops.map(d => {
-        if (d.category === 'material') return `<div class="log-entry">${d.name}を入手</div>`;
-        const r = rarityOf(d.corruption);
-        return `<div class="log-entry">${categoryLabel(d.category)}「${d.name}」を入手 <span class="${r.cls}">[${r.label}]</span> 侵食度${d.corruption}</div>`;
-      }).join('')
-    : '<div class="muted" style="padding:4px 8px;">ドロップなし</div>';
-  let resultHtml = entry.result === 'dead'
-    ? `<div class="log-entry" style="color:var(--danger);">全滅した…</div>`
-    : `<div class="log-entry">${entry.enemyName}を倒した</div>`;
-
-  modal.innerHTML = `
-    <div class="modal-overlay" id="logModalOverlay">
-      <div class="modal centered">
-        <div class="modal-header"><h3 style="margin:0;">${entry.dungeonName} ${entry.floor}階の記録</h3><span class="close-x" id="closeLogModal">✕</span></div>
-        ${actionsHtml}
-        ${resultHtml}
-        ${dropsHtml}
-      </div>
-    </div>
-  `;
-  document.getElementById('closeLogModal').onclick = () => { modal.innerHTML = ''; };
-  document.getElementById('logModalOverlay').onclick = (e) => { if (e.target.id === 'logModalOverlay') modal.innerHTML = ''; };
-}
-
-// ===================== ITEM画面 =====================
-let currentItemFilter = 'weapon'; // 要望1: 「すべて」を排除し「武器」をデフォルトに設定
-document.querySelectorAll('#itemCategoryTabs button').forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll('#itemCategoryTabs button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentItemFilter = btn.dataset.cat;
-    renderItemList();
-  };
-});
-
-// 要望3: アイテム名は最初から表示させる
-function itemDisplayName(item) {
-  const def = findEquipDef(item.category, item.defId);
-  return def.name; 
-}
-
-function renderItemCard(item, opts) {
-  opts = opts || {};
-  const def = findEquipDef(item.category, item.defId);
-  const isEquipped = state.equipped[item.category] === item.uid;
-  const r = rarityOf(item.corruption);
-  const div = document.createElement('div');
-  div.className = 'item-card' + (isEquipped ? ' equipped' : '') + (item.justEvolved ? ' flash-evolve' : '') + (opts.selected ? ' selected' : '');
-  item.justEvolved = false;
-
-  const knownBase = item.analysisLv >= 3;
-  const knownDungeon = item.analysisLv >= 2;
-
-  const statLine = !knownBase ? '' :
-    item.category === 'weapon' ? `ATK:${def.atk + item.enhanceLv + corruptionAtkBonus(item)}` :
-    item.category === 'shield' ? `DEF:${def.def + item.enhanceLv + corruptionAtkBonus(item)}` : '';
-  const enhanceLine = (item.category !== 'ring' && knownBase)
-    ? `<div class="muted">強化 +${item.enhanceLv} / ${enhanceCapFor(item)}</div>` : '';
-  const dungeonLine = knownDungeon
-    ? `<div class="muted">入手: ${GAME_DATA.dungeons.find(d => d.id === def.dungeon)?.name || '?'}</div>` : '';
-  const abilitiesHtml = item.abilities.map(a =>
-    `<span class="ability-tag${a.rare ? ' rare' : ''}">${a.name}${a.rare ? '' : ' Lv' + a.lv}</span>`).join('');
-
-  div.innerHTML = `
-    <div class="row">
-      <span class="item-name ${r.cls}">${isEquipped ? '【E】' : ''}${itemDisplayName(item)} ${statLine ? '(' + statLine + ')' : ''}</span>
-      ${opts.showEquipButton !== false ? `<button class="small ${isEquipped ? 'secondary' : ''}" data-equip="${item.uid}" data-cat="${item.category}">${isEquipped ? '解除' : '装備'}</button>` : ''}
-    </div>
-    <div class="muted">解析Lv${item.analysisLv}${state.worldLevel > 0 ? ` <span class="corrupt-badge">侵食度${item.corruption}</span>` : ''}</div>
-    ${dungeonLine}
-    ${enhanceLine}
-    <div>${abilitiesHtml}</div>
-  `;
-  return div;
-}
-
-function renderItemList() {
-  const el = document.getElementById('itemList');
-  el.innerHTML = '';
-  let items = state.inventory.slice().sort((a, b) => b.corruption - a.corruption);
-  items = items.filter(it => it.category === currentItemFilter); // 「すべて」がないため常にフィルタリング
+function gameLoop() {
+  if(!player.exploring) return;
   
-  if (items.length === 0) {
-    el.innerHTML = '<p class="muted">まだ装備がありません。ダンジョンで集めましょう。</p>';
-    return;
+  const totalTime = player.exploring.minPerFloor * 60;
+  const elapsed = Math.floor((Date.now() - player.exploring.startTime) / 1000);
+  
+  if(elapsed >= totalTime) {
+    processFloorClear();
+  } else if (elapsed % 5 === 0) {
+    // Occasional battle simulation update
+    simulateBattle();
   }
-  items.forEach(item => {
-    const card = renderItemCard(item);
-    card.onclick = (e) => {
-      if (e.target.dataset.equip) return;
-      openItemDetail(item.uid);
-    };
-    el.appendChild(card);
-  });
-  el.querySelectorAll('[data-equip]').forEach(btn => {
-    btn.onclick = (e) => {
-      e.stopPropagation();
-      const cat = btn.dataset.cat;
-      const uid = btn.dataset.equip;
-      state.equipped[cat] = state.equipped[cat] === uid ? null : uid;
-      renderItemList();
-      renderStatusScreen();
-      renderDungeonList();
-      renderTopBar();
-      saveState();
-    };
-  });
+  
+  if(document.querySelector('.tabbar .active').dataset.screen === 'dungeon') {
+    renderDungeons();
+  }
 }
 
-function openItemDetail(uid) {
-  const item = state.inventory.find(it => it.uid === uid);
-  const modal = document.getElementById('modalRoot');
-  const knownGrowth = item.analysisLv >= 4;
-  const growthLine = knownGrowth && item.category !== 'ring'
-    ? `<p class="muted">レベルアップ時の上昇量が解析済み</p>` : '';
-  modal.innerHTML = `
-    <div class="modal-overlay" id="detailOverlay">
-      <div class="modal centered">
-        <div class="modal-header"><h3 style="margin:0;">${itemDisplayName(item)}</h3><span class="close-x" id="closeDetail">✕</span></div>
-        <div class="exp-bar-bg" style="margin-bottom:6px;">
-          <div class="exp-bar-fill" style="width:${Math.min(100, item.analysisExp / expNeededForNextLv(item.analysisLv + 1) * 100)}%;"></div>
-        </div>
-        <p class="muted">解析Lv${item.analysisLv}（次まで ${item.analysisExp}/${expNeededForNextLv(item.analysisLv + 1)} exp）</p>
-        ${growthLine}
-        ${item.category !== 'ring' ? `<button class="small full" id="btnGoEnhance">強化する</button>` : '<p class="muted">指輪は強化できません</p>'}
-      </div>
-    </div>
-  `;
-  document.getElementById('closeDetail').onclick = () => { modal.innerHTML = ''; };
-  document.getElementById('detailOverlay').onclick = (e) => { if (e.target.id === 'detailOverlay') modal.innerHTML = ''; };
-  const enhanceBtn = document.getElementById('btnGoEnhance');
-  if (enhanceBtn) enhanceBtn.onclick = () => { modal.innerHTML = ''; openEnhanceModal(uid); };
+function simulateBattle() {
+  const st = getPlayerStats();
+  const dId = player.exploring.id === 8 ? 5 : player.exploring.id; // Alias for random
+  const monsters = GAME_DATA.monsters.filter(m => m.dungeon === dId);
+  const m = monsters[Math.floor(Math.random() * monsters.length)] || GAME_DATA.monsters[0];
+  
+  // Format requested: 
+  // (User)と(Monster)が対峙した！
+  // (User)LvX, ATK X, DEF X, SPD X vs (Monster) ATK X, DEF X, SPD X
+  // (〇〇が先攻だ！)
+  
+  let pAtk = st.str + st.atk;
+  let pDef = st.vit + st.def;
+  
+  let logStr = `冒険者と${m.name}が対峙した！\n`;
+  logStr += `冒険者 Lv${player.level} ATK:${pAtk} DEF:${pDef} SPD:${st.spd} vs ${m.name} ATK:${m.atk} DEF:${m.def} SPD:${m.spd}\n`;
+  logStr += (st.spd >= m.spd) ? "冒険者が先攻だ！\n" : `${m.name}が先攻だ！\n`;
+  
+  // Simple clash math
+  let pdmg = Math.max(1, m.atk - pDef);
+  player.exploring.damageTaken += pdmg / st.maxHp;
+  
+  player.exploring.log = logStr + `${m.name}を倒した！`;
+  document.getElementById('currentExploreLog').innerText = player.exploring.log;
 }
 
-function renderMaterialGrid() {
-  const el = document.getElementById('materialGrid');
-  el.innerHTML = '';
-  let any = false;
-  GAME_DATA.enhanceMaterials.forEach(m => {
-    const count = state.materials[m.id] || 0;
-    if (count <= 0) return;
-    any = true;
-    const div = document.createElement('div');
-    div.className = 'mat-card';
-    div.innerHTML = `<div>${m.name}</div><div class="cnt">×${count}</div><div class="muted">+${m.value}</div>`;
-    el.appendChild(div);
-  });
-  if (!any) el.innerHTML = '<p class="muted">強化素材がありません。ダンジョンで集めましょう。</p>';
-}
+function processFloorClear() {
+  const dId = player.exploring.id;
+  const f = player.exploring.floor;
+  
+  logMessage(`${player.exploring.name} B${f}F をクリアした。`);
+  
+  // Drops
+  if(Math.random() < 0.3) {
+    const m = GAME_DATA.monsters.find(x=>x.dungeon === dId) || GAME_DATA.monsters[0];
+    const dropBase = GAME_DATA.weapons[0]; // Simplified
+    const luk = getPlayerStats().luk;
+    const newItem = { uid: uid(), baseId: dropBase.id, type: "weapon", abilities: generateAbilities(luk) };
+    player.inventory.push(newItem);
+    logMessage(`${dropBase.name} を手に入れた！`);
+  }
 
-// ===================== 強化モーダル =====================
-function openEnhanceModal(uid) {
-  const item = state.inventory.find(it => it.uid === uid);
-  if (item.category === 'ring') { alert('指輪は強化できません'); return; }
-  const def = findEquipDef(item.category, item.defId);
-  const cap = enhanceCapFor(item);
-  const pct = Math.min(100, (item.enhanceLv / cap) * 100);
-  const modal = document.getElementById('modalRoot');
+  // Level up simplified
+  player.exp += 100;
+  if(player.exp > player.level * 200) {
+    player.level++;
+    logMessage(`レベルアップ！ Lv${player.level}になった！`);
+  }
 
-  const matOptions = GAME_DATA.enhanceMaterials.map(m => {
-    const have = state.materials[m.id] || 0;
-    return `<option value="${m.id}" ${have <= 0 ? 'disabled' : ''}>${m.name}（+${m.value}） 所持${have}個</option>`;
-  }).join('');
-
-  modal.innerHTML = `
-    <div class="modal-overlay" id="enhanceOverlay">
-      <div class="modal centered">
-        <div class="modal-header"><h3 style="margin:0;">${def.name}を強化</h3><span class="close-x" id="closeEnhance">✕</span></div>
-        <div class="enhance-bar-bg" style="margin-bottom:10px;">
-          <div class="enhance-bar-fill" style="width:${pct}%;"></div>
-          <div class="enhance-bar-text">+${item.enhanceLv} / ${cap}</div>
-        </div>
-        <p class="muted">強化素材と個数を選んでください</p>
-        <div class="row" style="gap:6px; margin-bottom:10px;">
-          <select id="enhanceMatSelect" style="flex:2;">${matOptions}</select>
-          <input type="number" id="enhanceCountInput" value="1" min="1" style="flex:1;">
-        </div>
-        <button class="full gold" id="btnDoEnhance">強化する</button>
-        ${def.evolvesTo ? `<p class="muted" style="margin-top:8px;">上限まで強化すると進化する可能性があります</p>` : ''}
-      </div>
-    </div>
-  `;
-  document.getElementById('closeEnhance').onclick = () => { modal.innerHTML = ''; };
-  document.getElementById('enhanceOverlay').onclick = (e) => { if (e.target.id === 'enhanceOverlay') modal.innerHTML = ''; };
-  document.getElementById('btnDoEnhance').onclick = () => {
-    const matId = document.getElementById('enhanceMatSelect').value;
-    const count = parseInt(document.getElementById('enhanceCountInput').value, 10) || 1;
-    const ok = enhanceItem(uid, matId, count);
-    if (ok) {
-      modal.innerHTML = '';
-      renderItemList(); renderMaterialGrid(); renderStatusScreen();
-      saveState();
-    } else {
-      alert('強化できません（素材不足、または上限到達）');
+  if(f >= player.exploring.maxFloor) {
+    // Dungeon cleared
+    logMessage(`${player.exploring.name} を完全踏破した！`);
+    if(dId > player.flags.maxDungeonCleared) player.flags.maxDungeonCleared = dId;
+    
+    if(dId === 1 && !player.flags.unlockedItemGuide) {
+      player.flags.unlockedItemGuide = true;
+      showToast("「アイテム図鑑」を獲得しました！");
     }
-  };
+    if(dId === 8 && !player.flags.hasWhiteKey) {
+      player.flags.hasWhiteKey = true;
+      showToast("「白の鍵」を獲得しました！");
+    }
+
+    player.exploring = null;
+  } else {
+    player.exploring.floor++;
+    player.exploring.startTime = Date.now();
+    player.exploring.damageTaken = 0;
+  }
+  save();
+  refreshCurrentScreen();
 }
 
-// ===================== 解析モーダル =====================
-document.getElementById('btnOpenAnalysis').onclick = openAnalysisModal;
+function logMessage(msg) {
+  player.logs.unshift(`[${new Date().toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'})}] ${msg}`);
+  if(player.logs.length > 50) player.logs.pop();
+}
 
+function renderLogs() {
+  const c = document.getElementById('logList');
+  c.innerHTML = player.logs.map(l => `<div class="log-entry">${l}</div>`).join('');
+}
+
+// Items
+function renderItems(cat) {
+  const c = document.getElementById('itemList');
+  c.innerHTML = '';
+  player.inventory.filter(i => i.type === cat).forEach(i => {
+    let base;
+    if(cat==='weapon') base = GAME_DATA.weapons.find(x=>x.id===i.baseId);
+    if(cat==='shield') base = GAME_DATA.shields.find(x=>x.id===i.baseId);
+    if(cat==='ring') base = GAME_DATA.rings.find(x=>x.id===i.baseId);
+    if(!base) return;
+
+    const isEq = player.equipped[cat] === i.uid;
+    const div = document.createElement('div');
+    div.className = `item-card ${isEq ? 'equipped' : ''}`;
+    div.innerHTML = `
+      <div class="row">
+        <span class="item-name">${base.name}</span>
+        ${isEq ? '<span style="color:var(--accent);font-size:12px;font-weight:600;">装備中</span>' : ''}
+      </div>
+      <div class="muted" style="margin-top:4px;">
+        ${i.abilities.map(a => `<span class="ability-tag">${a}</span>`).join('')}
+      </div>
+    `;
+    div.onclick = () => showItemDetails(i, base, isEq);
+    c.appendChild(div);
+  });
+}
+
+function showItemDetails(item, base, isEq) {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal centered">
+      <div class="modal-header">
+        <h3 style="margin:0">${base.name}</h3>
+        <span class="close-x" onclick="this.closest('.modal-overlay').remove()">×</span>
+      </div>
+      <div>
+        <p><strong>ATK:</strong> ${base.atk || 0} <strong>DEF:</strong> ${base.def || 0}</p>
+        <p><strong>能力:</strong> ${item.abilities.length > 0 ? item.abilities.join(', ') : 'なし'}</p>
+        ${!isEq ? `<button class="full" id="btnEquipMod">装備する</button>` : `<button class="full secondary" disabled>装備中</button>`}
+      </div>
+    </div>
+  `;
+  document.getElementById('modalRoot').appendChild(modal);
+  
+  const equipBtn = modal.querySelector('#btnEquipMod');
+  if(equipBtn) {
+    equipBtn.onclick = () => {
+      player.equipped[item.type] = item.uid;
+      save();
+      modal.remove();
+      refreshCurrentScreen();
+    };
+  }
+}
+
+// Status Screen
+function renderStatus() {
+  const st = getPlayerStats();
+  
+  // Growth list
+  let glHTML = '';
+  ['weapon', 'shield', 'ring'].forEach(t => {
+    if(player.equipped[t]) {
+      const it = player.inventory.find(i => i.uid === player.equipped[t]);
+      let base = null;
+      if(t==='weapon') base = GAME_DATA.weapons.find(x=>x.id===it.baseId);
+      if(t==='shield') base = GAME_DATA.shields.find(x=>x.id===it.baseId);
+      if(t==='ring') base = GAME_DATA.rings.find(x=>x.id===it.baseId);
+      if(base) {
+        glHTML += `<div><strong>${base.name}</strong><br>Lv1時(HP${base.lv1.hp||0}, STR${base.lv1.str||0}, VIT${base.lv1.vit||0}, SPD${base.lv1.spd||0})<br>UP時(HP${base.lvup.hp||0}, STR${base.lvup.str||0}, VIT${base.lvup.vit||0}, SPD${base.lvup.spd||0})</div><br>`;
+      }
+    }
+  });
+  document.getElementById('equippedGrowthList').innerHTML = glHTML;
+
+  // Projection Table
+  const tbody = document.querySelector('#statusProjectionTable tbody');
+  tbody.innerHTML = '';
+  [1, 10, 20, 30, 40, 50].forEach(lv => {
+    const s = getPlayerStats(lv);
+    tbody.innerHTML += `<tr><td>Lv${lv}</td><td>${s.hp}</td><td>${s.str}</td><td>${s.vit}</td><td>${s.spd}</td></tr>`;
+  });
+
+  // Boost tab
+  document.getElementById('permanentBoostList').innerHTML = `
+    <table class="stat-table">
+      <tr><th>HP</th><td>+${player.allocatedBP.hp}</td></tr>
+      <tr><th>STR</th><td>+${player.allocatedBP.str}</td></tr>
+      <tr><th>VIT</th><td>+${player.allocatedBP.vit}</td></tr>
+      <tr><th>SPD</th><td>+${player.allocatedBP.spd}</td></tr>
+    </table>
+  `;
+
+  // Records
+  document.getElementById('adventureRecords').innerHTML = `
+    最高到達ダンジョンID: ${player.flags.maxDungeonCleared}<br>
+    白の鍵所持: ${player.flags.hasWhiteKey ? 'あり' : 'なし'}
+  `;
+}
+
+// Item Analysis Modal (アイテム図鑑)
 function openAnalysisModal() {
-  state.analysisSelection = { target: null, material: null };
-  renderAnalysisModal();
-}
-
-function renderAnalysisModal() {
-  const modal = document.getElementById('modalRoot');
-  const sel = state.analysisSelection;
-  const items = state.inventory.slice().sort((a, b) => b.corruption - a.corruption);
-
-  function targetListHtml() {
-    return items.map(it => {
-      const r = rarityOf(it.corruption);
-      const isSel = sel.target === it.uid;
-      return `<div class="item-card ${isSel ? 'selected' : ''}" data-mode="target" data-uid="${it.uid}">
-        <span class="item-name ${r.cls}">${itemDisplayName(it)}</span>
-        <div class="muted">解析Lv${it.analysisLv}${state.worldLevel > 0 ? ` <span class="corrupt-badge">侵食度${it.corruption} [${r.label}]</span>` : ''}</div>
-      </div>`;
-    }).join('') || '<p class="muted">装備がありません</p>';
-  }
-
-  function materialListHtml(targetItem) {
-    const candidates = items.filter(it => canUseAsAnalysisMaterial(targetItem, it));
-    if (candidates.length === 0) return '<p class="muted">素材にできる同じ装備がありません（装備中のものは使えません）</p>';
-    return candidates.map(it => {
-      const r = rarityOf(it.corruption);
-      const isSel = sel.material === it.uid;
-      return `<div class="item-card ${isSel ? 'selected' : ''}" data-mode="material" data-uid="${it.uid}">
-        <span class="item-name ${r.cls}">${itemDisplayName(it)}</span>
-        <div class="muted">解析Lv${it.analysisLv} <span class="corrupt-badge">侵食度${it.corruption} [${r.label}] exp+${r.expGain}</span></div>
-      </div>`;
-    }).join('');
-  }
-
-  const targetItem = sel.target ? state.inventory.find(it => it.uid === sel.target) : null;
-  const matItem = sel.material ? state.inventory.find(it => it.uid === sel.material) : null;
-
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
   modal.innerHTML = `
-    <div class="modal-overlay" id="analysisOverlay">
-      <div class="modal">
-        <div class="modal-header"><h3 style="margin:0;">解析</h3><span class="close-x" id="closeAnalysis">✕</span></div>
-        <p class="muted">①解析したい装備を選ぶ → ②同じ装備を素材に選ぶ（消費されます。装備中のものは使えません）</p>
-        <h4 style="margin:10px 0 6px;">① 解析する装備${targetItem ? '：選択中 → ' + itemDisplayName(targetItem) : ''}</h4>
-        <div id="targetList">${targetListHtml()}</div>
-        ${sel.target ? `
-          <h4 style="margin:14px 0 6px;">② 素材にする同じ装備${matItem ? '：選択中 → exp+' + rarityOf(matItem.corruption).expGain : ''}</h4>
-          <div id="materialList">${materialListHtml(targetItem)}</div>
-          <button class="full gold" id="btnDoAnalyze" style="margin-top:10px;" ${matItem ? '' : 'disabled'}>解析する</button>
-        ` : ''}
+    <div class="modal">
+      <div class="modal-header">
+        <h3 style="margin:0">アイテム図鑑・解析・BP</h3>
+        <span class="close-x" onclick="this.closest('.modal-overlay').remove(); refreshCurrentScreen();">×</span>
       </div>
+      
+      <div style="margin-bottom:16px;">
+        <h4 style="margin:4px 0;">BP割り振り (残り: <span id="anaBPAvail">${player.bp}</span>)</h4>
+        <div class="row" style="margin-bottom:4px;">HP <button class="small" onclick="allocBP('hp')">+</button></div>
+        <div class="row" style="margin-bottom:4px;">STR <button class="small" onclick="allocBP('str')">+</button></div>
+        <div class="row" style="margin-bottom:4px;">VIT <button class="small" onclick="allocBP('vit')">+</button></div>
+        <div class="row" style="margin-bottom:4px;">SPD <button class="small" onclick="allocBP('spd')">+</button></div>
+      </div>
+      <hr style="border-color:var(--border);">
+      <h4 style="margin:8px 0;">解析</h4>
+      <p class="muted" style="font-size:11px;">ボタンを押すと解析値が上がり、アイテムの詳細が見えるようになります。(一定値でBP獲得)</p>
+      <div id="analysisList"></div>
     </div>
   `;
-  document.getElementById('closeAnalysis').onclick = () => { modal.innerHTML = ''; };
-  document.getElementById('analysisOverlay').onclick = (e) => { if (e.target.id === 'analysisOverlay') modal.innerHTML = ''; };
-  modal.querySelectorAll('[data-mode="target"]').forEach(card => {
-    card.onclick = () => { sel.target = card.dataset.uid; sel.material = null; renderAnalysisModal(); };
-  });
-  modal.querySelectorAll('[data-mode="material"]').forEach(card => {
-    card.onclick = () => { sel.material = card.dataset.uid; renderAnalysisModal(); };
-  });
-  const btn = document.getElementById('btnDoAnalyze');
-  if (btn) {
-    btn.onclick = () => {
-      const leveledUp = analyzeWithMaterial(sel.target, sel.material);
-      if (leveledUp !== false) {
-        modal.innerHTML = '';
-        renderItemList(); renderMaterialGrid(); renderStatusScreen(); renderTopBar();
-        alert('解析した！');
-        saveState();
-      }
-    };
-  }
-}
+  document.getElementById('modalRoot').appendChild(modal);
 
-// ===================== STATUS画面 =====================
-function renderStatusScreen() {
-  const stats = computePlayerStats();
-  const table = document.getElementById('statusTable');
-  const rows = [
-    ['HP', Math.round(stats.totalHp), stats.growth.hp],
-    ['ATK(武器込み)', Math.round(stats.totalAtk), stats.growth.str],
-    ['DEF(盾込み)', Math.round(stats.totalDef), stats.growth.vit],
-    ['SPD', stats.base.spd, stats.growth.spd],
-    ['LUK(ドロップ補正)', stats.base.luk, stats.growth.luk],
-  ];
-  table.innerHTML = `
-    <tr><th>項目</th><th>現在値</th><th>LvUP</th></tr>
-    ${rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>+${r[2].toFixed(1)}</td></tr>`).join('')}
-  `;
-  const activeRare = Object.keys(stats.rareFlags).filter(k => stats.rareFlags[k]);
-  if (activeRare.length) {
-    table.innerHTML += `<tr><td colspan="3" class="muted">特殊：${activeRare.join(' / ')}</td></tr>`;
-  }
-
-  const eqEl = document.getElementById('equippedList');
-  eqEl.innerHTML = ['weapon', 'shield', 'ring'].map(cat => {
-    const item = getEquippedItem(cat);
-    if (!item) return `<div class="muted">${categoryLabel(cat)}: 未装備</div>`;
-    const def = findEquipDef(cat, item.defId);
-    const r = rarityOf(item.corruption);
-    return `<div>${categoryLabel(cat)}: <span class="item-name ${r.cls}">${itemDisplayName(item)}</span> <span class="muted">+${item.enhanceLv}</span></div>`;
-  }).join('');
-
-  renderPermanentBoostList();
-  renderRareAbilityUnlockList();
-  document.getElementById('topRating').textContent = computeRating(stats).toLocaleString();
-}
-
-function renderPermanentBoostList() {
-  document.getElementById('bpAvailable').textContent = state.bp;
-  const el = document.getElementById('permanentBoostList');
-  el.innerHTML = GAME_DATA.permanentBoostOptions.map(o => `
-    <div class="row" style="margin-bottom:6px;">
-      <span>${o.label}（現在+${state.permanentBoosts[o.key]} / 1BPごとに+${o.perPoint}）</span>
-      <button class="small gold" data-spend="${o.key}" ${state.bp <= 0 ? 'disabled' : ''}>BPを使う</button>
-    </div>
-  `).join('');
-  el.querySelectorAll('[data-spend]').forEach(btn => {
-    btn.onclick = () => { spendBPOnStat(btn.dataset.spend); renderStatusScreen(); };
-  });
-}
-
-function renderRareAbilityUnlockList() {
-  const cost = GAME_DATA.rareAbilityUnlockCost;
-  const totalSpentOnStats = Object.values(state.permanentBoosts).reduce((a, b) => a + b, 0);
-  const unlockedRareCount = Object.values(state.rareAbilityUnlocked).filter(Boolean).length;
-  const canRespec = totalSpentOnStats > 0 || unlockedRareCount > 0;
-  const el = document.getElementById('rareAbilityUnlockList');
-  el.innerHTML = `<p class="muted">特殊能力の永久固定化（${cost}BP）：装備に依存せず常時発動します</p>` +
-    GAME_DATA.rareAbilities.map(name => `
-      <div class="row" style="margin-bottom:6px;">
-        <span>${name} ${state.rareAbilityUnlocked[name] ? '<span class="ability-tag rare">固定化済み</span>' : ''}</span>
-        <button class="small gold" data-unlock="${name}" ${state.bp < cost || state.rareAbilityUnlocked[name] ? 'disabled' : ''}>${state.rareAbilityUnlocked[name] ? '固定化済み' : `固定化(${cost}BP)`}</button>
-      </div>
-    `).join('') + `
-      <button class="small secondary full" id="btnRespecAll" ${canRespec ? '' : 'disabled'} style="margin-top:6px;">
-        すべて振り直し（ステータス+特殊能力 合計${totalSpentOnStats + unlockedRareCount * cost}BP回収）
-      </button>
-    `;
-  el.querySelectorAll('[data-unlock]').forEach(btn => {
-    btn.onclick = () => { unlockRareAbility(btn.dataset.unlock); renderStatusScreen(); };
-  });
-  const respecBtn = document.getElementById('btnRespecAll');
-  if (respecBtn) {
-    respecBtn.onclick = () => {
-      if (confirm('ステータス・特殊能力に振ったBPをすべて回収して振り直しますか？')) {
-        respecAll();
-        renderStatusScreen();
-      }
-    };
-  }
-}
-
-// ===================== トップバー =====================
-function renderTopBar() {
-  document.getElementById('topBP').textContent = state.bp;
-}
-
-// ===================== タブ切り替え =====================
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.getElementById('screen-' + btn.dataset.screen).classList.remove('hidden');
-    if (btn.dataset.screen === 'item') { renderItemList(); renderMaterialGrid(); }
-    if (btn.dataset.screen === 'status') renderStatusScreen();
-    if (btn.dataset.screen === 'log') renderLogList();
-    if (btn.dataset.screen === 'dungeon') renderDungeonList();
-  };
-});
-
-document.getElementById('btnNextStep').onclick = runOneTurn;
-document.getElementById('btnRetreat').onclick = retreatExplore;
-
-// ===================== 初期化 =====================
-function init() {
-  // セーブデータが無い場合は初期装備を配布
-  if (!loadState()) {
-    const startWeapon = createDroppedItem('weapon', 'w_000', 0); // 木の棒
-    const startShield = createDroppedItem('shield', 's_000', 0); // なべのふた
-    const startRing = createDroppedItem('ring', 'r_000', 0);     // 銅の指輪
-    [startWeapon, startShield, startRing].forEach(it => { it.abilities = []; it.analysisLv = 1; });
-    state.inventory.push(startWeapon, startShield, startRing);
-    state.equipped.weapon = startWeapon.uid;
-    state.equipped.shield = startShield.uid;
-    state.equipped.ring = startRing.uid;
-
-    addMaterial('m_katakunaru', 10);
-    addMaterial('m_katakunaru_x', 3);
-    saveState();
-  }
-
-  // 選択中の装備カテゴリタブを同期
-  document.querySelectorAll('#itemCategoryTabs button').forEach(b => {
-    if (b.dataset.cat === currentItemFilter) b.classList.add('active');
-    else b.classList.remove('active');
-  });
-
-  renderDungeonList();
-  renderTopBar();
-  
-  // 探索中にリロードした場合はUIを復元
-  if (state.currentDungeon && state.exploreState && !state.exploreState.finished) {
-    const dungeonDef = GAME_DATA.dungeons.find(d => d.id === state.currentDungeon);
-    if (dungeonDef) {
-      document.getElementById('screen-dungeon').classList.remove('hidden');
-      document.getElementById('explorePanel').classList.remove('hidden');
-      document.getElementById('exploreDungeonName').textContent = dungeonDef.name;
-      updateExploreUI();
+  window.allocBP = (stat) => {
+    if(player.bp > 0) {
+      player.bp--;
+      player.allocatedBP[stat]++;
+      document.getElementById('anaBPAvail').innerText = player.bp;
+      save();
     }
-  }
+  };
+
+  renderAnalysisList();
 }
+
+function renderAnalysisList() {
+  const c = document.getElementById('analysisList');
+  if(!c) return;
+  c.innerHTML = '';
+  
+  // Aggregate discovered baseIds
+  const discovered = [...new Set(player.inventory.map(i => i.baseId))];
+  
+  discovered.forEach(id => {
+    let base = GAME_DATA.weapons.find(x=>x.id===id) || GAME_DATA.shields.find(x=>x.id===id) || GAME_DATA.rings.find(x=>x.id===id);
+    if(!base) return;
+
+    const val = player.analysisData[id] || 0;
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.style.marginBottom = '8px';
+    div.innerHTML = `
+      <div class="row">
+        <strong>${base.name}</strong>
+        <span style="color:var(--gold);">解析値: ${val}%</span>
+      </div>
+      ${val >= 50 ? `<div class="muted" style="font-size:11px;">詳細: ATK/DEF判明等...</div>` : ''}
+      <button class="secondary small full" style="margin-top:6px;" onclick="doAnalyze('${id}')" ${val>=100 ? 'disabled' : ''}>解析を進める</button>
+    `;
+    c.appendChild(div);
+  });
+}
+
+window.doAnalyze = (id) => {
+  player.analysisData[id] = (player.analysisData[id] || 0) + 10;
+  if(player.analysisData[id] > 100) player.analysisData[id] = 100;
+  
+  // BP logic: Give 1 BP for every 50% (simplified from prompt's "every 5 lv")
+  if(player.analysisData[id] === 50 || player.analysisData[id] === 100) {
+    player.bp += 1;
+    showToast("解析ボーナス！BP+1");
+    if(document.getElementById('anaBPAvail')) document.getElementById('anaBPAvail').innerText = player.bp;
+  }
+  
+  save();
+  renderAnalysisList();
+};
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.innerText = msg;
+  t.style.opacity = '1';
+  setTimeout(() => t.style.opacity = '0', 3000);
+}
+
+// Start
 init();
 
 </script>
